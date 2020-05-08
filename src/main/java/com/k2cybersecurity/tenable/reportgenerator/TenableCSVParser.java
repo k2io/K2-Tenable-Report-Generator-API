@@ -156,7 +156,7 @@ public class TenableCSVParser {
 				finalK2Output += "\n\n";
 			}
 			if (k2output2.size() > 0) {
-				finalK2Output += "K2 has detected following additional attacks or information for this vulnerability\n";
+				finalK2Output += "K2 has found the following additional attacks for this URL\n";
 				for (K2MinifiedOutput output : k2output2) {
 					finalK2Output += output.toString();
 				}
@@ -175,9 +175,10 @@ public class TenableCSVParser {
 			List<ModifiedK2Report> modifiedK2Reports) {
 		for (ModifiedK2Report modifiedK2Report : modifiedK2Reports) {
 			if (!modifiedK2Report.isFoundByTenable()) {
+				String finalMessage = "Tenable has not reported this attack but K2 has reported.\n\n"; 
 				TenableReport tr = new TenableReport();
 				tr.setDescription(modifiedK2Report.getAttackDescription());
-				tr.setK2output(modifiedK2Report.toString());
+				tr.setK2output(finalMessage + modifiedK2Report.toString());
 				tenableReports.add(tr);
 			}
 		}
