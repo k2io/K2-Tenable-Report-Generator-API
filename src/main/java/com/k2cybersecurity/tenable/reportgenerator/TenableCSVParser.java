@@ -24,6 +24,15 @@ import com.k2cybersecurity.tenable.models.TenablePluginOutput;
 import com.k2cybersecurity.tenable.models.TenableReport;
 
 public class TenableCSVParser {
+	private static int tenableCount;
+	private static int tenableInformationCount;
+	private static int tenableLowCount;
+	private static int tenableMediumCount;
+	private static int tenableHighCount;
+	private static int k2HighCount;
+	private static int commonFindCount;
+	private static int onlyK2FindCount;
+	private static int onlyTenableFindCount;
 
 	public List<TenableReport> parse(String fileName, List<TenableReport> tenableReports) {
 		System.out.println("In Tenable parse method");
@@ -165,7 +174,11 @@ public class TenableCSVParser {
 			if (StringUtils.isEmpty(finalK2Output)) {
 				String msg = "K2 has not found any attack for this URL.";
 				finalK2Output += msg;
+				onlyTenableFindCount++;
+			} else {
+				commonFindCount++;
 			}
+			
 			System.out.println("finalK2Output : " + finalK2Output);
 			tenableReport.setK2output(finalK2Output);
 		}
@@ -175,11 +188,18 @@ public class TenableCSVParser {
 			List<ModifiedK2Report> modifiedK2Reports) {
 		for (ModifiedK2Report modifiedK2Report : modifiedK2Reports) {
 			if (!modifiedK2Report.isFoundByTenable()) {
-				String finalMessage = "Tenable has not reported this attack but K2 has reported.\n\n"; 
+				String finalMessage = "Tenable has not reported this attack but K2 has reported.\n\n";
 				TenableReport tr = new TenableReport();
-				tr.setDescription(modifiedK2Report.getAttackDescription());
+				tr.setPluginID("K2");
+				tr.setRisk("High");
+				tr.setHost(modifiedK2Report.getiP());
+				tr.setProtocol("TCP");
+				tr.setPort(StringUtils.split(modifiedK2Report.getPorts(), ',')[0]);
+				tr.setName(modifiedK2Report.getAttackDescription());
+				tr.setSynopsis(modifiedK2Report.getAttackDescription());
 				tr.setK2output(finalMessage + modifiedK2Report.toString());
 				tenableReports.add(tr);
+				onlyK2FindCount++;
 			}
 		}
 	}
@@ -196,6 +216,41 @@ public class TenableCSVParser {
 //		System.out.println("URL: " + tenableReport.getTenablePluginOutput().getUrl());
 //		System.out.println("Name: " + tenableReport.getName());
 		System.out.println("Detection Information: " + tenableReport.toString());
+	}
+
+	private static void countSummary(List<TenableReport> tenableReports, List<ModifiedK2Report> modifiedK2Reports) {
+		for (TenableReport tenableReport : tenableReports) {
+			if (StringUtils.equals(tenableReport.getRisk(), "Informational")) {
+				tenableInformationCount++;
+			} else if (StringUtils.equals(tenableReport.getRisk(), "Low")) {
+				tenableLowCount++;
+			} else if (StringUtils.equals(tenableReport.getRisk(), "Medium")) {
+				tenableMediumCount++;
+			} else if (StringUtils.equals(tenableReport.getRisk(), "High")) {
+				tenableHighCount++;
+			}
+		}
+		
+		tenableCount = tenableReports.size();
+		k2HighCount = modifiedK2Reports.size();
+
+	}
+
+	private static void addSummaryInFinalReport(List<TenableReport> tenableReports) {
+		String finalMessage = "Summary Information\n===================\n\nTenable Findings count:\nTotal Vulnarabilities Count = "
+				+ tenableCount + "\nTotal Information Count = " + tenableInformationCount + "\nTotal Low Count = "
+				+ tenableLowCount + "\nTotal Medium Count = " + tenableMediumCount + "\nTotal High Count = "
+				+ tenableHighCount + "\n\nK2 Findings Count:\nTotal Attack Count = " + k2HighCount
+				+ "\nTotal High Count = " + k2HighCount
+				+ "\n\nComparison:\nTotal count(Both K2 and Tenable has found) = " + commonFindCount
+				+ "\nOnly Tenable Findings Count = " + onlyTenableFindCount + "\nOnly K2 Findings Count = "
+				+ onlyK2FindCount;
+
+		TenableReport tr = new TenableReport();
+		tr.setPluginID("Summary");
+		tr.setK2output(finalMessage);
+		tenableReports.add(tr);
+		onlyK2FindCount++;
 	}
 
 	public static void run(String TENABLE_CSV_FILE_PATH, List<K2Report> k2Reports) {
@@ -218,7 +273,11 @@ public class TenableCSVParser {
 
 		mergeTenableReports(tenableReports, modifiedK2Reports);
 
+		countSummary(tenableReports, modifiedK2Reports);
+
 		addAttacksFoundByOnlyK2(tenableReports, modifiedK2Reports);
+
+		addSummaryInFinalReport(tenableReports);
 
 //		printMergedTenableReport(tenableReports);
 
