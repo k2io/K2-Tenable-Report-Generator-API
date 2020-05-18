@@ -2,15 +2,13 @@ package com.k2cybersecurity.reportgenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.k2cybersecurity.k2.models.K2MinifiedOutput;
 import com.k2cybersecurity.k2.models.K2Report;
 import com.k2cybersecurity.k2.reportgenerator.K2CSVParser;
-import com.k2cybersecurity.tenable.models.TenableReport;
 import com.k2cybersecurity.tenable.reportgenerator.TenableCSVParser;
+import com.k2cybersecurity.tenable.reportgenerator.TenableCSVParser2;
 
 public class Runner {
 
@@ -37,6 +35,12 @@ public class Runner {
 		} else {
 			System.out.println("Only Tenable is supported now");
 		}
+		
+//		if (StringUtils.equalsIgnoreCase(REPORT_NAME, "tenable")) {
+//			TenableCSVParser2.run(TENABLE_CSV_FILE_PATH, k2Reports);
+//		} else {
+//			System.out.println("Only Tenable is supported now");
+//		}
 
 	}
 }

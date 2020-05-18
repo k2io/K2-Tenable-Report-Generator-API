@@ -69,4 +69,27 @@ public class CSVWriter {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void writeCompareReport(List<BriefReport> reports) {
+		try {
+			FileWriter out = new FileWriter(new File("/Users/prateek/Downloads/Compare-Report.csv"));
+			CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader("URL", "Deteted by K2",
+					"Attacks Marked by K2", "Detected by Tenable", "Attacks Marked by Tenable", "Remarks"));
+
+			for (BriefReport report : reports) {
+				List<String> record = new ArrayList<String>();
+				record.add(report.getUrl());
+				record.add(report.isDetctedByK2() ? "Yes" : "No");
+				record.add(StringUtils.join(report.getK2ReportedAttacks(), "\n"));
+				record.add(report.isDetctedByTenable() ? "Yes" : "No");
+				record.add(StringUtils.join(report.getTenableReportedAttacks(), "\n"));
+				record.add(report.getRemarks());
+				printer.printRecord(record);
+			}
+			printer.close(true);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

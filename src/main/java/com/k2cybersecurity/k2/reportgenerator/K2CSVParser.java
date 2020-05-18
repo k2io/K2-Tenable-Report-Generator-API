@@ -22,7 +22,7 @@ public class K2CSVParser {
 			Reader reader = Files.newBufferedReader(Paths.get(fileName));
 			CSVParser csvParser = new CSVParser(reader,
 					CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
-			System.out.println("K2 CSV headers : \n" + csvParser.getHeaderNames());
+//			System.out.println("K2 CSV headers : \n" + csvParser.getHeaderNames());
 			for (CSVRecord csvRecord : csvParser) {
 				K2Report k2Report = new K2Report();
 				k2Report.setAttackTime(csvRecord.get("Attack Time"));
@@ -43,7 +43,7 @@ public class K2CSVParser {
 				k2Report.setSyscallModule(csvRecord.get("Syscall Module"));
 				k2Report.setZerodayApplication(csvRecord.get("Zeroday Application"));
 				k2Reports.add(k2Report);
-				System.out.println(k2Report.toString());
+//				System.out.println(k2Report.toString());
 			}
 
 			csvParser.close();
