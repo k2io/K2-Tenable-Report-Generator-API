@@ -17,15 +17,20 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import com.itextpdf.kernel.color.Color;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Paragraph;
 import com.k2cybersecurity.k2.models.K2MinifiedOutput;
 import com.k2cybersecurity.k2.models.K2Report;
 import com.k2cybersecurity.reportgenerator.CSVWriter;
 import com.k2cybersecurity.tenable.models.BriefReport;
 import com.k2cybersecurity.tenable.models.ModifiedK2Report;
+import com.k2cybersecurity.tenable.models.TenableFinalReport;
 import com.k2cybersecurity.tenable.models.TenablePluginOutput;
 import com.k2cybersecurity.tenable.models.TenableReport;
-import com.sun.org.apache.bcel.internal.generic.NEWARRAY;
 
 public class TenableCSVParser {
 	private static int tenableCount;
@@ -34,9 +39,16 @@ public class TenableCSVParser {
 	private static int tenableMediumCount;
 	private static int tenableHighCount;
 	private static int k2HighCount;
+	private static int totalCount;
 	private static int commonFindCount;
 	private static int onlyK2FindCount;
+	private static int onlyTenableFindCount;
 	private static Set<String> urls = new HashSet<String>();
+	private static Map<String, Integer> summaryMap = new HashMap<String, Integer>();
+
+	private static List<TenableFinalReport> tenableFinalReports = new ArrayList<TenableFinalReport>();
+	private static List<ModifiedK2Report> onlyK2Detcted = new ArrayList<ModifiedK2Report>();
+	private static Map<ImmutablePair<String, String>, List<ModifiedK2Report>> onlyK2Detect = new HashMap<ImmutablePair<String, String>, List<ModifiedK2Report>>();
 
 	public List<TenableReport> parse(String fileName, List<TenableReport> tenableReports) {
 		System.out.println("In Tenable parse method");
@@ -118,113 +130,151 @@ public class TenableCSVParser {
 	}
 
 	private static void mergeTenableReports(List<TenableReport> tenableReports, List<ModifiedK2Report> k2Reports) {
+
 		for (TenableReport tenableReport : tenableReports) {
-//			if (StringUtils.equals(tenableReport.getRisk(), "High")) {
-			String url = null;
-			String inputName = null;
-			String injectedPayload = null;
-			if (tenableReport.getTenablePluginOutput().getUrl() != null) {
-				url = tenableReport.getTenablePluginOutput().getUrl();
-			}
-			if (tenableReport.getTenablePluginOutput().getDetectionInformation() != null) {
-				inputName = tenableReport.getTenablePluginOutput().getDetectionInformation().get("Input Name");
-			}
-			if (tenableReport.getTenablePluginOutput().getDetectionInformation() != null) {
-				injectedPayload = tenableReport.getTenablePluginOutput().getDetectionInformation()
-						.get("Injected Payload");
-			}
+			if (StringUtils.equals(tenableReport.getRisk(), "High")) {
+				TenableFinalReport tenableFinalReport = new TenableFinalReport();
+				tenableFinalReport.setTenableReport(tenableReport);
 
-			List<K2MinifiedOutput> k2output1 = new ArrayList<K2MinifiedOutput>();
-			List<K2MinifiedOutput> k2output2 = new ArrayList<K2MinifiedOutput>();
-			String finalK2Output = "";
+				String url = null;
+				String inputName = null;
+				String injectedPayload = null;
+				if (tenableReport.getTenablePluginOutput().getUrl() != null) {
+					url = tenableReport.getTenablePluginOutput().getUrl();
+				}
+				if (tenableReport.getTenablePluginOutput().getDetectionInformation() != null) {
+					inputName = tenableReport.getTenablePluginOutput().getDetectionInformation().get("Input Name");
+				}
+				if (tenableReport.getTenablePluginOutput().getDetectionInformation() != null) {
+					injectedPayload = tenableReport.getTenablePluginOutput().getDetectionInformation()
+							.get("Injected Payload");
+				}
 
-			for (ModifiedK2Report k2Report : k2Reports) {
-				K2MinifiedOutput k2MinifiedOutput = new K2MinifiedOutput();
+				List<K2MinifiedOutput> k2output1 = new ArrayList<K2MinifiedOutput>();
+				List<K2MinifiedOutput> k2output2 = new ArrayList<K2MinifiedOutput>();
+				String finalK2Output = "";
 
-				if (StringUtils.isNotEmpty(url) && StringUtils.endsWith(url, k2Report.gethTTPURL())) {
-					if (StringUtils.equals(tenableReport.getName(), "SQL Injection")
-							&& StringUtils.equals(k2Report.getAttackDescription(), "SQL Injection Attack")) {
-						k2MinifiedOutput.sethTTPURL(k2Report.gethTTPURL());
-						k2MinifiedOutput.setAttackDescription(k2Report.getAttackDescription());
-						k2MinifiedOutput.setFileName(k2Report.getFileName());
-						k2MinifiedOutput.setMethodName(k2Report.getMethodName());
-						k2MinifiedOutput.setLineNumber(k2Report.getLineNumber());
-						k2MinifiedOutput.setParameterMap(k2Report.getParameterMap());
-						k2Report.setFoundByTenable(true);
-						if (StringUtils.isNotEmpty(inputName) && StringUtils.isNotEmpty(injectedPayload)
-								&& k2Report.getParameterMap().contains(inputName)
-								&& k2Report.getParameterMap().contains(injectedPayload)) {
-							k2output1.add(k2MinifiedOutput);
-						} else {
-							k2output2.add(k2MinifiedOutput);
+				for (ModifiedK2Report k2Report : k2Reports) {
+					K2MinifiedOutput k2MinifiedOutput = new K2MinifiedOutput();
+
+					if (StringUtils.isNotEmpty(url) && StringUtils.endsWith(url, k2Report.gethTTPURL())) {
+						if (StringUtils.contains(tenableReport.getName(), "SQL Injection")
+								&& StringUtils.equals(k2Report.getAttackDescription(), "SQL Injection Attack")) {
+							k2MinifiedOutput.sethTTPURL(k2Report.gethTTPURL());
+							k2MinifiedOutput.setAttackDescription(k2Report.getAttackDescription());
+							k2MinifiedOutput.setFileName(k2Report.getFileName());
+							k2MinifiedOutput.setMethodName(k2Report.getMethodName());
+							k2MinifiedOutput.setLineNumber(k2Report.getLineNumber());
+							k2MinifiedOutput.setParameterMap(k2Report.getParameterMap());
+							k2MinifiedOutput.setExecutedQueryOrCommand(k2Report.getExecutedQueryOrCommand());
+							k2Report.setFoundByTenable(true);
+							if (StringUtils.isNotEmpty(inputName) && StringUtils.isNotEmpty(injectedPayload)
+									&& k2Report.getParameterMap().contains(inputName)
+									&& k2Report.getParameterMap().contains(injectedPayload)) {
+								k2output1.add(k2MinifiedOutput);
+							} else {
+								k2output2.add(k2MinifiedOutput);
+							}
+						} else if (StringUtils.contains(tenableReport.getName(), "Cross-Site Scripting (XSS)")
+								&& StringUtils.contains(k2Report.getAttackDescription(), "XSS Attack")) {
+							k2MinifiedOutput.sethTTPURL(k2Report.gethTTPURL());
+							k2MinifiedOutput.setAttackDescription(k2Report.getAttackDescription());
+							k2MinifiedOutput.setFileName(k2Report.getFileName());
+							k2MinifiedOutput.setMethodName(k2Report.getMethodName());
+							k2MinifiedOutput.setLineNumber(k2Report.getLineNumber());
+							k2MinifiedOutput.setParameterMap(k2Report.getParameterMap());
+							k2MinifiedOutput.setExecutedQueryOrCommand(k2Report.getExecutedQueryOrCommand());
+							k2Report.setFoundByTenable(true);
+							if (StringUtils.isNotEmpty(inputName) && StringUtils.isNotEmpty(injectedPayload)
+									&& k2Report.getParameterMap().contains(inputName)
+									&& k2Report.getParameterMap().contains(injectedPayload)) {
+								k2output1.add(k2MinifiedOutput);
+							} else {
+								k2output2.add(k2MinifiedOutput);
+							}
 						}
-					} else if (StringUtils.contains(tenableReport.getName(), "Cross-Site Scripting (XSS)")
-							&& StringUtils.contains(k2Report.getAttackDescription(), "XSS Attack")) {
-						k2MinifiedOutput.sethTTPURL(k2Report.gethTTPURL());
-						k2MinifiedOutput.setAttackDescription(k2Report.getAttackDescription());
-						k2MinifiedOutput.setFileName(k2Report.getFileName());
-						k2MinifiedOutput.setMethodName(k2Report.getMethodName());
-						k2MinifiedOutput.setLineNumber(k2Report.getLineNumber());
-						k2MinifiedOutput.setParameterMap(k2Report.getParameterMap());
-						k2Report.setFoundByTenable(true);
-						if (StringUtils.isNotEmpty(inputName) && StringUtils.isNotEmpty(injectedPayload)
-								&& k2Report.getParameterMap().contains(inputName)
-								&& k2Report.getParameterMap().contains(injectedPayload)) {
-							k2output1.add(k2MinifiedOutput);
-						} else {
-							k2output2.add(k2MinifiedOutput);
-						}
+
 					}
+				}
+				if (k2output1.size() > 0) {
+					tenableFinalReport.setBothDetected(k2output1);
+					finalK2Output += "K2 has also detected the same vulnerability with following additional details.\n";
+					for (K2MinifiedOutput output : k2output1) {
+						finalK2Output += output.toString();
+					}
+					finalK2Output += "\n\n";
+				}
+				if (k2output2.size() > 0) {
+					tenableFinalReport.setAdditionalFindings(k2output2);
+					finalK2Output += "K2 has found the following additional attacks for this URL\n";
+					for (K2MinifiedOutput output : k2output2) {
+						finalK2Output += output.toString();
+					}
+					finalK2Output += "\n\n";
+				}
+				if (StringUtils.isEmpty(finalK2Output)) {
+					tenableFinalReport.setBothDetected(new ArrayList<K2MinifiedOutput>());
+					tenableFinalReport.setAdditionalFindings(new ArrayList<K2MinifiedOutput>());
+					String msg = "K2 has not found any attack for this URL.";
+					finalK2Output += msg;
+				}
 
-				}
+				System.out.println("finalK2Output : " + finalK2Output);
+				tenableReport.setK2output(finalK2Output);
+				tenableFinalReports.add(tenableFinalReport);
 			}
-			if (k2output1.size() > 0) {
-				finalK2Output += "K2 has also detected the same vulnerability with following additional details.\n";
-				for (K2MinifiedOutput output : k2output1) {
-					finalK2Output += output.toString();
-				}
-				finalK2Output += "\n\n";
-			}
-			if (k2output2.size() > 0) {
-				finalK2Output += "K2 has found the following additional attacks for this URL\n";
-				for (K2MinifiedOutput output : k2output2) {
-					finalK2Output += output.toString();
-				}
-				finalK2Output += "\n\n";
-			}
-			if (StringUtils.isEmpty(finalK2Output)) {
-				String msg = "K2 has not found any attack for this URL.";
-				finalK2Output += msg;
-			} else {
-				commonFindCount++;
-			}
-
-			System.out.println("finalK2Output : " + finalK2Output);
-			tenableReport.setK2output(finalK2Output);
-//			}
 
 		}
 	}
 
-	private static void addAttacksFoundByOnlyK2(List<TenableReport> tenableReports,
-			List<ModifiedK2Report> modifiedK2Reports) {
-		int counter = 0;
+	private static void prepareAttacksFoundByOnlyK2(List<ModifiedK2Report> modifiedK2Reports) {
 		for (ModifiedK2Report modifiedK2Report : modifiedK2Reports) {
 			if (!modifiedK2Report.isFoundByTenable()) {
-				String finalMessage = "High risk vulnerability detected by K2. Tenable did not detect this vulnerability.\n\n";
-				TenableReport tr = new TenableReport();
-				tr.setPluginID("K2");
-				tr.setcVSS("7.5");
-				tr.setRisk("High");
-				tr.setHost(modifiedK2Report.getiP());
-				tr.setProtocol("TCP");
-				tr.setPort(StringUtils.split(modifiedK2Report.getPorts(), ',')[0]);
-				tr.setName(modifiedK2Report.getAttackDescription());
-				tr.setSynopsis(modifiedK2Report.getAttackDescription());
-				tr.setK2output(finalMessage + modifiedK2Report.toString());
-				tenableReports.add(counter++, tr);
-				onlyK2FindCount++;
+				ImmutablePair<String, String> pair = new ImmutablePair<String, String>(
+						modifiedK2Report.getAttackDescription(), modifiedK2Report.gethTTPURL());
+				List<ModifiedK2Report> list = onlyK2Detect.get(pair);
+				if (list == null || list.size() == 0) {
+					list = new ArrayList<ModifiedK2Report>();
+					list.add(modifiedK2Report);
+				} else {
+					list.add(modifiedK2Report);
+				}
+				onlyK2Detect.put(pair, list);
 			}
+		}
+	}
+
+	private static void addAttacksFoundByOnlyK2InCSV(List<TenableReport> tenableReports,
+			List<ModifiedK2Report> modifiedK2Reports) {
+		int counter = 0;
+		for (Pair<String, String> pair : onlyK2Detect.keySet()) {
+			List<ModifiedK2Report> list = onlyK2Detect.get(pair);
+
+			String finalMessage = "Tenable did not detect this vulnerability.\n\n";
+			TenableReport tr = new TenableReport();
+			tr.setPluginID("K2");
+			tr.setcVSS("7.5");
+			tr.setRisk("High");
+			tr.setHost(list.get(0).getiP());
+			tr.setProtocol("TCP");
+			tr.setPort(StringUtils.split(list.get(0).getPorts(), ',')[0]);
+			tr.setName(pair.getLeft());
+			tr.setSynopsis(pair.getLeft());
+
+			String k2Report = "";
+			k2Report += "Vulnerability : " + pair.getLeft();
+			k2Report += "\nPath : " + pair.getRight();
+			k2Report += "\nFinding ID: " + list.get(0).getIncidentID();
+			k2Report += "\nRisk : High";
+			k2Report += "\nFile Name : " + list.get(0).getFileName();
+			k2Report += "\nMethod Name : " + list.get(0).getMethodName();
+			k2Report += "\nLine Number : " + list.get(0).getLineNumber();
+			k2Report += "\nParameters : ";
+			for (ModifiedK2Report modifiedK2Report : list) {
+				k2Report += "\n" + modifiedK2Report.getParameterMap();
+			}
+			tr.setK2output(finalMessage + k2Report);
+			tenableReports.add(counter++, tr);
 		}
 	}
 
@@ -242,7 +292,7 @@ public class TenableCSVParser {
 		System.out.println("Detection Information: " + tenableReport.toString());
 	}
 
-	private static void countSummary(List<TenableReport> tenableReports, List<ModifiedK2Report> modifiedK2Reports) {
+	private static void addSummaryInFinalReport(List<TenableReport> tenableReports, List<BriefReport> briefReports) {
 		for (TenableReport tenableReport : tenableReports) {
 			if (StringUtils.equals(tenableReport.getRisk(), "Informational")) {
 				tenableInformationCount++;
@@ -250,31 +300,67 @@ public class TenableCSVParser {
 				tenableLowCount++;
 			} else if (StringUtils.equals(tenableReport.getRisk(), "Medium")) {
 				tenableMediumCount++;
-			} else if (StringUtils.equals(tenableReport.getRisk(), "High")) {
+			} else if (!StringUtils.equals(tenableReport.getPluginID(), "K2")
+					&& StringUtils.equals(tenableReport.getRisk(), "High")) {
 				tenableHighCount++;
 			}
 		}
 
-		tenableCount = tenableReports.size();
-		k2HighCount = modifiedK2Reports.size();
+		tenableCount = tenableInformationCount + tenableLowCount + tenableMediumCount + tenableHighCount;
 
-	}
+		summaryMap.put("tenableInformationCount", tenableInformationCount);
+		summaryMap.put("tenableLowCount", tenableLowCount);
+		summaryMap.put("tenableMediumCount", tenableMediumCount);
+		summaryMap.put("tenableHighCount", tenableHighCount);
+		summaryMap.put("tenableCount", tenableCount);
 
-	private static void addSummaryInFinalReport(List<TenableReport> tenableReports) {
-		String finalMessage = "Summary\n===================\n\nTenable Findings count:\nTotal Vulnerabilities Count = "
-				+ tenableCount + "\nTotal Information Count = " + tenableInformationCount + "\nTotal Low Count = "
-				+ tenableLowCount + "\nTotal Medium Count = " + tenableMediumCount + "\nTotal High Count = "
-				+ tenableHighCount + "\n\nK2 Findings Count:\nTotal Attack Count = " + k2HighCount
-				+ "\nTotal High Count = " + k2HighCount
-				+ "\n\nComparison:\nTotal count of distinct URL with High Risk (Both K2 and Tenable has found) = "
-				+ commonFindCount + "\nHigh Vulnerabilities Findings Count by Tenable only= " + tenableHighCount
-				+ "\nHigh Severity Attack count by K2 Only = " + onlyK2FindCount;
+		for (BriefReport briefReport : briefReports) {
+			k2HighCount += briefReport.getK2ReportedAttacks().size();
+
+			int t = briefReport.getTenableReportedAttacks().size();
+			int k = briefReport.getK2ReportedAttacks().size();
+			if (t >= k) {
+				totalCount += t;
+			} else {
+				totalCount += k;
+			}
+
+			if (briefReport.isDetctedByK2() && !briefReport.isDetctedByTenable()) {
+				onlyK2FindCount += briefReport.getK2ReportedAttacks().size();
+			}
+			if (briefReport.isDetctedByTenable() && !briefReport.isDetctedByK2()) {
+				onlyTenableFindCount += briefReport.getTenableReportedAttacks().size();
+			}
+			if (briefReport.isDetctedByTenable() && briefReport.isDetctedByK2()) {
+				if (t < k) {
+					commonFindCount += briefReport.getTenableReportedAttacks().size();
+					onlyK2FindCount += k - t;
+				} else {
+					commonFindCount += briefReport.getK2ReportedAttacks().size();
+					onlyTenableFindCount += t - k;
+				}
+			}
+		}
+		summaryMap.put("k2HighCount", k2HighCount);
+
+		summaryMap.put("totalCount", totalCount);
+		summaryMap.put("commonFindCount", commonFindCount);
+		summaryMap.put("onlyK2FindCount", onlyK2FindCount);
+		summaryMap.put("onlyTenableFindCount", onlyTenableFindCount);
+
+		String finalMessage = "Summary\n=========\n\nTenable:\nTotal Vulnerabilities = " + tenableCount
+				+ "\nInformational Vulnerabilities = " + tenableInformationCount + "\nLow Risk Vulnerabilities = "
+				+ tenableLowCount + "\nMedium Risk Vulnerabilities = " + tenableMediumCount
+				+ "\nHigh Risk Vulnerabilities = " + tenableHighCount + "\n\nK2:\n" + "High Risk Vulnerabilities = "
+				+ k2HighCount + "\n\nComparison:\n Total High Risk Vulnerabilities = " + totalCount
+				+ "\nHigh Risk Vulnerabilities (Both K2 and Tenable has found) = " + commonFindCount
+				+ "\nHigh Risk Vulnerabilities (Found by Tenable Only) = " + onlyTenableFindCount
+				+ "\nHigh Risk Vulnerabilities (Found by K2 Only) = " + onlyK2FindCount;
 
 		TenableReport tr = new TenableReport();
 		tr.setPluginID("Summary");
 		tr.setDescription(finalMessage);
 		tenableReports.add(0, tr);
-		onlyK2FindCount++;
 	}
 
 	private static void sortReport(List<TenableReport> tenableReports) {
@@ -344,51 +430,10 @@ public class TenableCSVParser {
 
 	}
 
-	private static void createCompareReport(List<TenableReport> tenableReports,
-			List<ModifiedK2Report> modifiedK2Reports, List<BriefReport> compareReport) {
-		for (ModifiedK2Report modifiedK2Report : modifiedK2Reports) {
-			urls.add(modifiedK2Report.gethTTPURL());
-		}
-		for (TenableReport tenableReport : tenableReports) {
-			if (tenableReport.getTenablePluginOutput() != null
-					&& StringUtils.isNotBlank(tenableReport.getTenablePluginOutput().getUrl())) {
-				String url = tenableReport.getTenablePluginOutput().getUrl();
-				urls.add(StringUtils.substring(url, StringUtils.ordinalIndexOf(url, "/", 3)));
-			}
-		}
-
-		for (String str : urls) {
-			BriefReport briefReport = new BriefReport();
-			briefReport.setUrl(str);
-			for (TenableReport tenableReport : tenableReports) {
-				if (tenableReport.getTenablePluginOutput() != null
-						&& tenableReport.getTenablePluginOutput().getUrl() != null
-						&& StringUtils.endsWith(tenableReport.getTenablePluginOutput().getUrl(), str)) {
-					briefReport.getTenableReportedAttacks().add(tenableReport.getName());
-				}
-			}
-			if (briefReport.getTenableReportedAttacks().size() > 0) {
-				briefReport.setDetctedByTenable(true);
-			}
-
-			for (ModifiedK2Report k2Report : modifiedK2Reports) {
-				if (StringUtils.equals(k2Report.gethTTPURL(), str)) {
-					briefReport.getK2ReportedAttacks().add(k2Report.getAttackDescription());
-				}
-			}
-			if (briefReport.getK2ReportedAttacks().size() > 0) {
-				briefReport.setDetctedByK2(true);
-			}
-			compareReport.add(briefReport);
-		}
-
-	}
-
 	public static void run(String TENABLE_CSV_FILE_PATH, List<K2Report> k2Reports) {
 		List<TenableReport> tenableReports = new ArrayList<TenableReport>();
 		List<ModifiedK2Report> modifiedK2Reports = new ArrayList<ModifiedK2Report>();
 		List<BriefReport> briefReports = new ArrayList<BriefReport>();
-		List<BriefReport> compareReport = new ArrayList<BriefReport>();
 
 		try {
 			for (K2Report k2Report : k2Reports) {
@@ -408,23 +453,17 @@ public class TenableCSVParser {
 
 		mergeTenableReports(tenableReports, modifiedK2Reports);
 
-		countSummary(tenableReports, modifiedK2Reports);
+		prepareAttacksFoundByOnlyK2(modifiedK2Reports);
 
-		addAttacksFoundByOnlyK2(tenableReports, modifiedK2Reports);
-
-		addSummaryInFinalReport(tenableReports);
-
-//		printMergedTenableReport(tenableReports);
+		addAttacksFoundByOnlyK2InCSV(tenableReports, modifiedK2Reports);
 
 		createBriefReport(tenableReports, modifiedK2Reports, briefReports);
 
-		createCompareReport(tenableReports, modifiedK2Reports, compareReport);
+		addSummaryInFinalReport(tenableReports, briefReports);
 
 		CSVWriter.writeMergedReport(tenableReports);
-//		CSVWriter.writeBriefReport(briefReports);
-		CSVWriter.writeCompareReport(compareReport);
-
-		TenablePDFWriter.write(tenableReports);
+		CSVWriter.writeBriefReport(briefReports);
+		TenablePDFWriter.write(summaryMap, onlyK2Detect, tenableFinalReports);
 	}
 
 }

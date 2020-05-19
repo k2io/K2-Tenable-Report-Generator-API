@@ -23,22 +23,24 @@ public class CSVWriter {
 							"Synopsis", "Description", "Solution", "See Also", "Plugin Output", "K2 Output"));
 
 			for (TenableReport tenableReport : tenableReports) {
-				List<String> record = new ArrayList<String>();
-				record.add(tenableReport.getPluginID());
-				record.add(tenableReport.getcVE());
-				record.add(tenableReport.getcVSS());
-				record.add(tenableReport.getRisk());
-				record.add(tenableReport.getHost());
-				record.add(tenableReport.getProtocol());
-				record.add(tenableReport.getPort());
-				record.add(tenableReport.getName());
-				record.add(tenableReport.getSynopsis());
-				record.add(tenableReport.getDescription());
-				record.add(tenableReport.getSolution());
-				record.add(tenableReport.getSeeAlso());
-				record.add(tenableReport.getPluginOutput());
-				record.add(tenableReport.getK2output());
-				printer.printRecord(record);
+				if (StringUtils.equals(tenableReport.getRisk(), "High")) {
+					List<String> record = new ArrayList<String>();
+					record.add(tenableReport.getPluginID());
+					record.add(tenableReport.getcVE());
+					record.add(tenableReport.getcVSS());
+					record.add(tenableReport.getRisk());
+					record.add(tenableReport.getHost());
+					record.add(tenableReport.getProtocol());
+					record.add(tenableReport.getPort());
+					record.add(tenableReport.getName());
+					record.add(tenableReport.getSynopsis());
+					record.add(tenableReport.getDescription());
+					record.add(tenableReport.getSolution());
+					record.add(tenableReport.getSeeAlso());
+					record.add(tenableReport.getPluginOutput());
+					record.add(tenableReport.getK2output());
+					printer.printRecord(record);
+				}
 			}
 			printer.close(true);
 			out.close();
@@ -69,27 +71,5 @@ public class CSVWriter {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void writeCompareReport(List<BriefReport> reports) {
-		try {
-			FileWriter out = new FileWriter(new File("/Users/prateek/Downloads/Compare-Report.csv"));
-			CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader("URL", "Deteted by K2",
-					"Attacks Marked by K2", "Detected by Tenable", "Attacks Marked by Tenable", "Remarks"));
 
-			for (BriefReport report : reports) {
-				List<String> record = new ArrayList<String>();
-				record.add(report.getUrl());
-				record.add(report.isDetctedByK2() ? "Yes" : "No");
-				record.add(StringUtils.join(report.getK2ReportedAttacks(), "\n"));
-				record.add(report.isDetctedByTenable() ? "Yes" : "No");
-				record.add(StringUtils.join(report.getTenableReportedAttacks(), "\n"));
-				record.add(report.getRemarks());
-				printer.printRecord(record);
-			}
-			printer.close(true);
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }

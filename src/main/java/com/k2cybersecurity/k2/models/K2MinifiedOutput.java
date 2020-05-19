@@ -16,6 +16,8 @@ public class K2MinifiedOutput {
 
 	private String parameterMap;
 
+	private String executedQueryOrCommand;
+
 	public String gethTTPURL() {
 		return hTTPURL;
 	}
@@ -64,10 +66,18 @@ public class K2MinifiedOutput {
 		this.parameterMap = parameterMap;
 	}
 
+	public String getExecutedQueryOrCommand() {
+		return executedQueryOrCommand;
+	}
+
+	public void setExecutedQueryOrCommand(String executedQueryOrCommand) {
+		this.executedQueryOrCommand = executedQueryOrCommand;
+	}
+
 	@Override
 	public String toString() {
-		return "\nHTTP URL : " + hTTPURL + "\nAttack Description : " + attackDescription + "\nFile Name : "
-				+ fileName + "\nMethod Name : " + methodName + "\nLine Number : " + lineNumber + "\nParameterMap : \n"
+		return "\nHTTP URL : " + hTTPURL + "\nAttack Description : " + attackDescription + "\nFile Name : " + fileName
+				+ "\nMethod Name : " + methodName + "\nLine Number : " + lineNumber + "\nParameterMap : \n"
 				+ parameterMap + "\n";
 	}
 
