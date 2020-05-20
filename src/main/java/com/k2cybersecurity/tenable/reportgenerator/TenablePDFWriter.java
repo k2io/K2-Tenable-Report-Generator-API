@@ -14,14 +14,149 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
-import com.k2cybersecurity.k2.models.K2MinifiedOutput;
+import com.itextpdf.layout.property.UnitValue;
+import com.k2cybersecurity.k2.models.K2Report;
+import com.k2cybersecurity.tenable.models.CombinedMapValue;
 import com.k2cybersecurity.tenable.models.ModifiedK2Report;
 import com.k2cybersecurity.tenable.models.TenableFinalReport;
 
 public class TenablePDFWriter {
 
-	public static void write(Map<String, Integer> summaryMap,
+	public static void write(Map<String, Integer> summaryMap, Map<String, List<String>> vulApis,
+			Map<ImmutablePair<String, String>, CombinedMapValue> endReport) {
+
+		String filename = "/Users/prateek/Downloads/K2-Tenable-New-Report.pdf";
+		PdfWriter writer;
+		try {
+			writer = new PdfWriter(filename);
+			PdfDocument pdf = new PdfDocument(writer);
+			Document document = new Document(pdf);
+			document.add(new Paragraph("K2 & TENABLE JOINT REPORT").setBackgroundColor(Color.GRAY).setBold()
+					.setBackgroundColor(Color.DARK_GRAY).setFontColor(Color.WHITE).setBold()
+					.setTextAlignment(TextAlignment.CENTER).setFontSize(20f));
+
+			document.add(new Paragraph("Summary").setBackgroundColor(Color.ORANGE).setFontColor(Color.BLACK).setBold()
+					.setPadding(3f));
+
+//			document.add(new Paragraph("Tenable").setUnderline().setFontColor(Color.BLUE));
+//			document.add(new Paragraph("Total Vulnerabilities = " + summaryMap.get("tenableCount")));
+//			document.add(new Paragraph("Informational Vulnerabilities = " + summaryMap.get("tenableInformationCount")));
+//			document.add(new Paragraph("Low Risk Vulnerabilities = " + summaryMap.get("tenableLowCount")));
+//			document.add(new Paragraph("Medium Risk Vulnerabilities = " + summaryMap.get("tenableMediumCount")));
+//			document.add(new Paragraph("High Risk Vulnerabilities = " + summaryMap.get("tenableHighCount")));
+//			document.add(new Paragraph("Critical Risk Vulnerabilities = " + summaryMap.get("tenableCriticalCount")));
+//
+//			document.add(new Paragraph("K2").setUnderline().setFontColor(Color.BLUE));
+//			document.add(new Paragraph("High Risk Vulnerabilities = " + summaryMap.get("k2HighCount")));
+
+//			document.add(new Paragraph("Comparison").setUnderline().setFontColor(Color.BLUE));
+			document.add(new Paragraph("Total Critical/High Risk Vulnerabilities = " + summaryMap.get("totalCount")));
+			document.add(new Paragraph("Critical/High Risk Vulnerabilities (Found by Both K2 and Tenable) = "
+					+ summaryMap.get("commonFindCount")));
+			document.add(new Paragraph("Critical/High Risk Vulnerabilities (Found by Tenable Only) = "
+					+ summaryMap.get("onlyTenableFindCount")));
+			document.add(new Paragraph(
+					"Critical/High Risk Vulnerabilities (Found by K2 Only) = " + summaryMap.get("onlyK2FindCount")));
+			document.add(new AreaBreak());
+
+			document.add(new Paragraph("Vulnerable APIs").setBackgroundColor(Color.ORANGE).setFontColor(Color.BLACK)
+					.setBold().setPadding(3f));
+
+			Table table = new Table(new float[] { 1, 1 });
+
+			table.addHeaderCell(new Paragraph("URI").setBold().setFontColor(Color.BLUE));
+			table.addHeaderCell(new Paragraph("Vulnerabilities").setBold().setFontColor(Color.BLUE));
+
+			for (String str : vulApis.keySet()) {
+				String api = "";
+				table.addCell(str);
+				for (String s : vulApis.get(str)) {
+					Paragraph p = new Paragraph();
+					api += s + "\n";
+				}
+				table.addCell(api);
+			}
+			document.add(table);
+			document.add(new AreaBreak());
+
+			for (ImmutablePair<String, String> pair : endReport.keySet()) {
+				document.add(new Paragraph("Vulnerability : " + pair.getRight()).setBackgroundColor(Color.ORANGE)
+						.setFontColor(Color.BLACK).setBold().setPadding(3f));
+				document.add(new Paragraph("Path : " + pair.getLeft()));
+				document.add(new Paragraph("Tenable information").setUnderline().setFontColor(Color.BLUE));
+				if (endReport.get(pair).getTenableReports().size() == 0) {
+					document.add(new Paragraph("Tenable did not detect this vulnerability.")
+							.setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
+				} else {
+					String tenableReport = "";
+					tenableReport += "Finding ID: " + endReport.get(pair).getTenableReports().get(0).getPluginID();
+//					document.add(new Paragraph("Finding ID: " + tenableFinalReport.getTenableReport().getPluginID()));
+					tenableReport += "\nRisk : " + endReport.get(pair).getTenableReports().get(0).getRisk();
+//					document.add(new Paragraph("Risk : " + tenableFinalReport.getTenableReport().getRisk()));
+
+					if (endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput().getUrl() != null) {
+						if (endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput()
+								.getDetectionInformation() != null) {
+							String di = "";
+
+							for (String str : endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput()
+									.getDetectionInformation().keySet()) {
+								di += "\n" + str + " : ";
+								di += endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput()
+										.getDetectionInformation().get(str);
+							}
+							tenableReport += "\nDetection Information :" + di;
+//							document.add(new Paragraph("Detection Information : \n" + di));
+						}
+					} else {
+						if (StringUtils.isNotBlank(endReport.get(pair).getTenableReports().get(0).getPluginOutput())) {
+							tenableReport += "Plugin Output: \n"
+									+ endReport.get(pair).getTenableReports().get(0).getPluginOutput();
+//							document.add(new Paragraph(
+//									"Plugin Output: \n" + tenableFinalReport.getTenableReport().getPluginOutput()));
+						}
+					}
+
+					if (!StringUtils.isEmpty(
+							endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput().getProof())) {
+						tenableReport += "\nProof : "
+								+ endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput().getProof();
+					}
+					document.add(new Paragraph(tenableReport).setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
+				}
+
+				document.add(new Paragraph("K2 information").setUnderline().setFontColor(Color.BLUE));
+
+				if (endReport.get(pair).getK2Reports().size() == 0) {
+					document.add(new Paragraph(
+							"K2 did not detect this vulnerability. It is likely a false positive reported by Tenable. Please view K2 logs to confirm or contact K2 team for support.")
+									.setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
+				} else {
+					List<K2Report> list = endReport.get(pair).getK2Reports();
+
+					String k2Report = "";
+					k2Report += "Finding ID: " + list.get(0).getIncidentID();
+					k2Report += "\nRisk : High";
+					k2Report += "\nFile Name : " + list.get(0).getFileName();
+					k2Report += "\nMethod Name : " + list.get(0).getMethodName();
+					k2Report += "\nLine Number : " + list.get(0).getLineNumber();
+					k2Report += "\nParameters : \n" + list.get(0).getParameterMap();
+					k2Report += "\nExecuted Query/Command : " + list.get(0).getExecutedQueryOrCommand();
+
+					document.add(new Paragraph(k2Report).setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
+				}
+				document.add(new AreaBreak());
+			}
+			document.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void writeOld(Map<String, Integer> summaryMap,
 			Map<ImmutablePair<String, String>, List<ModifiedK2Report>> onlyK2Detect,
 			List<TenableFinalReport> tenableFinalReports) {
 		String filename = "/Users/prateek/Downloads/K2-Tenable-Report.pdf";
@@ -44,6 +179,7 @@ public class TenablePDFWriter {
 			document.add(new Paragraph("Low Risk Vulnerabilities = " + summaryMap.get("tenableLowCount")));
 			document.add(new Paragraph("Medium Risk Vulnerabilities = " + summaryMap.get("tenableMediumCount")));
 			document.add(new Paragraph("High Risk Vulnerabilities = " + summaryMap.get("tenableHighCount")));
+			document.add(new Paragraph("Critical Risk Vulnerabilities = " + summaryMap.get("tenableCriticalCount")));
 
 			document.add(new Paragraph("K2").setUnderline().setFontColor(Color.BLUE));
 			document.add(new Paragraph("High Risk Vulnerabilities = " + summaryMap.get("k2HighCount")));
