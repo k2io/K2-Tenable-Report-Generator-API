@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.k2cybersecurity.k2.models.K2Report;
 import com.k2cybersecurity.k2.reportgenerator.K2CSVParser;
 import com.k2cybersecurity.tenable.reportgenerator.TenableCSVParser;
-import com.k2cybersecurity.tenable.reportgenerator.TenableCSVParser2;
 
 public class Runner {
 
