@@ -12,9 +12,9 @@ import com.k2cybersecurity.tenable.reportgenerator.TenableCSVParser;
 public class Runner {
 
 	public static void main(String[] args) {
-		System.out.println("Hello Prateek! Your new project Report generator");
 		System.out.println("K2 Report : " + args[1]);
 		System.out.println("Tenable Report : " + args[2]);
+		System.out.println("Output Directory : " + args[3]);
 
 //		String K2_CSV_FILE_PATH = "/Users/prateek/Downloads/Attacks_CSV_04282020.csv";
 //		String TENABLE_CSV_FILE_PATH = "/Users/prateek/Downloads/prateek_dvja-2.csv";

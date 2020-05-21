@@ -1,8 +1,5 @@
 package com.k2cybersecurity.k2.models;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class K2Report {
 
 	private String attackTime;

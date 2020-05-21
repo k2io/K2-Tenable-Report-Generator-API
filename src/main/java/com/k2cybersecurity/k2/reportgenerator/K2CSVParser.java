@@ -14,7 +14,7 @@ import com.k2cybersecurity.k2.models.K2Report;
 public class K2CSVParser {
 
 	public List<K2Report> parse(String fileName, List<K2Report> k2Reports) {
-		System.out.println("In K2 parse method");
+		System.out.println("Parsing K2 csv report");
 		try {
 			Reader reader = Files.newBufferedReader(Paths.get(fileName));
 			CSVParser csvParser = new CSVParser(reader,
@@ -64,10 +64,6 @@ public class K2CSVParser {
 		System.out.println("File Name: " + k2Report.getFileName());
 		System.out.println("API Method Name: " + k2Report.getMethodName());
 		System.out.println("API File Number: " + k2Report.getLineNumber());
-	}
-
-	private static void printK2ParamtereMap(K2Report k2Report) {
-		System.out.println(k2Report.getParameterMap());
 	}
 
 	public static void run(String K2_CSV_FILE_PATH, List<K2Report> k2Reports) {
