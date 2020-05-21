@@ -435,7 +435,7 @@ public class TenableCSVParser {
 
 	}
 
-	public static void run(String TENABLE_CSV_FILE_PATH, List<K2Report> k2Reports) {
+	public static void run(String TENABLE_CSV_FILE_PATH, List<K2Report> k2Reports, String OUTPUT_DIR) {
 		List<TenableReport> tenableReports = new ArrayList<TenableReport>();
 		List<ModifiedK2Report> modifiedK2Reports = new ArrayList<ModifiedK2Report>();
 		List<BriefReport> briefReports = new ArrayList<BriefReport>();
@@ -477,7 +477,7 @@ public class TenableCSVParser {
 
 		prepareSummary(endReport);
 		prepareVulnerableApis(endReport);
-		TenablePDFWriter.write(sumMap, vulApis, endReport);
+		TenablePDFWriter.write(sumMap, vulApis, endReport, OUTPUT_DIR);
 
 		TenablePDFWriter.writeOld(summaryMap, onlyK2Detect, tenableFinalReports);
 	}

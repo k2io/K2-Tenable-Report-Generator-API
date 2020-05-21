@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
@@ -25,9 +26,10 @@ import com.k2cybersecurity.tenable.models.TenableFinalReport;
 public class TenablePDFWriter {
 
 	public static void write(Map<String, Integer> summaryMap, Map<String, List<String>> vulApis,
-			Map<ImmutablePair<String, String>, CombinedMapValue> endReport) {
+			Map<ImmutablePair<String, String>, CombinedMapValue> endReport, String OUTPUT_DIR) {
 
-		String filename = "/Users/prateek/Downloads/K2-Tenable-New-Report.pdf";
+		String filename = OUTPUT_DIR + "/K2-Tenable-Report.pdf";
+
 		PdfWriter writer;
 		try {
 			writer = new PdfWriter(filename);
@@ -40,18 +42,6 @@ public class TenablePDFWriter {
 			document.add(new Paragraph("Summary").setBackgroundColor(Color.ORANGE).setFontColor(Color.BLACK).setBold()
 					.setPadding(3f));
 
-//			document.add(new Paragraph("Tenable").setUnderline().setFontColor(Color.BLUE));
-//			document.add(new Paragraph("Total Vulnerabilities = " + summaryMap.get("tenableCount")));
-//			document.add(new Paragraph("Informational Vulnerabilities = " + summaryMap.get("tenableInformationCount")));
-//			document.add(new Paragraph("Low Risk Vulnerabilities = " + summaryMap.get("tenableLowCount")));
-//			document.add(new Paragraph("Medium Risk Vulnerabilities = " + summaryMap.get("tenableMediumCount")));
-//			document.add(new Paragraph("High Risk Vulnerabilities = " + summaryMap.get("tenableHighCount")));
-//			document.add(new Paragraph("Critical Risk Vulnerabilities = " + summaryMap.get("tenableCriticalCount")));
-//
-//			document.add(new Paragraph("K2").setUnderline().setFontColor(Color.BLUE));
-//			document.add(new Paragraph("High Risk Vulnerabilities = " + summaryMap.get("k2HighCount")));
-
-//			document.add(new Paragraph("Comparison").setUnderline().setFontColor(Color.BLUE));
 			document.add(new Paragraph("Total Critical/High Risk Vulnerabilities = " + summaryMap.get("totalCount")));
 			document.add(new Paragraph("Critical/High Risk Vulnerabilities (Found by Both K2 and Tenable) = "
 					+ summaryMap.get("commonFindCount")));
@@ -65,6 +55,7 @@ public class TenablePDFWriter {
 					.setBold().setPadding(3f));
 
 			Table table = new Table(new float[] { 1, 1 });
+			table.setWidth(UnitValue.createPercentValue(100f));
 
 			table.addHeaderCell(new Paragraph("URI").setBold().setFontColor(Color.BLUE));
 			table.addHeaderCell(new Paragraph("Vulnerabilities").setBold().setFontColor(Color.BLUE));
@@ -73,7 +64,6 @@ public class TenablePDFWriter {
 				String api = "";
 				table.addCell(str);
 				for (String s : vulApis.get(str)) {
-					Paragraph p = new Paragraph();
 					api += s + "\n";
 				}
 				table.addCell(api);
@@ -92,9 +82,7 @@ public class TenablePDFWriter {
 				} else {
 					String tenableReport = "";
 					tenableReport += "Finding ID: " + endReport.get(pair).getTenableReports().get(0).getPluginID();
-//					document.add(new Paragraph("Finding ID: " + tenableFinalReport.getTenableReport().getPluginID()));
 					tenableReport += "\nRisk : " + endReport.get(pair).getTenableReports().get(0).getRisk();
-//					document.add(new Paragraph("Risk : " + tenableFinalReport.getTenableReport().getRisk()));
 
 					if (endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput().getUrl() != null) {
 						if (endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput()
@@ -108,14 +96,11 @@ public class TenablePDFWriter {
 										.getDetectionInformation().get(str);
 							}
 							tenableReport += "\nDetection Information :" + di;
-//							document.add(new Paragraph("Detection Information : \n" + di));
 						}
 					} else {
 						if (StringUtils.isNotBlank(endReport.get(pair).getTenableReports().get(0).getPluginOutput())) {
 							tenableReport += "Plugin Output: \n"
 									+ endReport.get(pair).getTenableReports().get(0).getPluginOutput();
-//							document.add(new Paragraph(
-//									"Plugin Output: \n" + tenableFinalReport.getTenableReport().getPluginOutput()));
 						}
 					}
 
@@ -130,9 +115,21 @@ public class TenablePDFWriter {
 				document.add(new Paragraph("K2 information").setUnderline().setFontColor(Color.BLUE));
 
 				if (endReport.get(pair).getK2Reports().size() == 0) {
-					document.add(new Paragraph(
-							"K2 did not detect this vulnerability. It is likely a false positive reported by Tenable. Please view K2 logs to confirm or contact K2 team for support.")
-									.setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
+					String output = "K2 did not detect this vulnerability. It is likely a false positive reported by Tenable. Please view K2 logs to confirm or contact K2 team for support.";
+
+					String addOn = "";
+
+					for (ImmutablePair<String, String> p : endReport.keySet()) {
+						if (StringUtils.equals(p.getLeft(), pair.getLeft())
+								&& !StringUtils.equals(p.getRight(), pair.getRight())) {
+							addOn += "\n- " + p.getRight();
+						}
+					}
+					if (StringUtils.isNotBlank(addOn)) {
+						output += "\nHowever, K2 detected following other vulnerabilities for this URL.";
+						output += addOn;
+					}
+					document.add(new Paragraph(output).setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
 				} else {
 					List<K2Report> list = endReport.get(pair).getK2Reports();
 
@@ -148,6 +145,10 @@ public class TenablePDFWriter {
 					document.add(new Paragraph(k2Report).setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
 				}
 				document.add(new AreaBreak());
+			}
+			PdfPage lastPage = pdf.getLastPage();
+			if (lastPage.getContentBytes().length == 0) {
+				pdf.removePage(lastPage);
 			}
 			document.close();
 		} catch (FileNotFoundException e) {

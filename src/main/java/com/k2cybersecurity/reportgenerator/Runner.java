@@ -26,21 +26,15 @@ public class Runner {
 		String REPORT_NAME = args[0];
 		String K2_CSV_FILE_PATH = args[1];
 		String TENABLE_CSV_FILE_PATH = args[2];
+		String OUTPUT_DIR = args[3];
 
 		List<K2Report> k2Reports = new ArrayList<K2Report>();
 		K2CSVParser.run(K2_CSV_FILE_PATH, k2Reports);
 
 		if (StringUtils.equalsIgnoreCase(REPORT_NAME, "tenable")) {
-			TenableCSVParser.run(TENABLE_CSV_FILE_PATH, k2Reports);
+			TenableCSVParser.run(TENABLE_CSV_FILE_PATH, k2Reports, OUTPUT_DIR);
 		} else {
 			System.out.println("Only Tenable is supported now");
 		}
-		
-//		if (StringUtils.equalsIgnoreCase(REPORT_NAME, "tenable")) {
-//			TenableCSVParser2.run(TENABLE_CSV_FILE_PATH, k2Reports);
-//		} else {
-//			System.out.println("Only Tenable is supported now");
-//		}
-
 	}
 }
