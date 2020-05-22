@@ -106,6 +106,15 @@ public class TenablePdfGenerator {
 		for (ImmutablePair<String, String> immutablePair : toDelete) {
 			endReport.remove(immutablePair);
 		}
+		
+		for (ImmutablePair<String, String> immutablePair : endReport.keySet()) {
+			if (endReport.get(immutablePair).getK2Reports().size() > 0) {
+				endReport.get(immutablePair).setDetectedByK2(true);
+			}
+			if (endReport.get(immutablePair).getTenableReports().size() > 0) {
+				endReport.get(immutablePair).setDetectedByTenable(true);
+			}
+		}
 	}
 
 	private static void prepareSummary(Map<ImmutablePair<String, String>, CombinedMapValue> endReport) {

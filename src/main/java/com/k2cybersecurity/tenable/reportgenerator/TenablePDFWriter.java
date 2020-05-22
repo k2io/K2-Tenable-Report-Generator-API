@@ -119,7 +119,8 @@ public class TenablePDFWriter {
 
 					for (ImmutablePair<String, String> p : endReport.keySet()) {
 						if (StringUtils.equals(p.getLeft(), pair.getLeft())
-								&& !StringUtils.equals(p.getRight(), pair.getRight())) {
+								&& !StringUtils.equals(p.getRight(), pair.getRight())
+								&& endReport.get(p).isDetectedByK2()) {
 							addOn += "\n- " + p.getRight();
 						}
 					}
