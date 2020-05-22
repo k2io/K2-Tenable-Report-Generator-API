@@ -7,7 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.k2cybersecurity.k2.models.K2Report;
 import com.k2cybersecurity.k2.reportgenerator.K2CSVParser;
+import com.k2cybersecurity.tenable.models.TenableReport;
+import com.k2cybersecurity.tenable.reportgenerator.TenableCSVGenerator;
 import com.k2cybersecurity.tenable.reportgenerator.TenableCSVParser;
+import com.k2cybersecurity.tenable.reportgenerator.TenablePdfGenerator;
 
 public class Runner {
 
@@ -31,7 +34,10 @@ public class Runner {
 		K2CSVParser.run(K2_CSV_FILE_PATH, k2Reports);
 
 		if (StringUtils.equalsIgnoreCase(REPORT_NAME, "tenable")) {
-			TenableCSVParser.run(TENABLE_CSV_FILE_PATH, k2Reports, OUTPUT_DIR);
+			List<TenableReport> tenableReports = new ArrayList<TenableReport>();
+			TenableCSVParser.run(tenableReports, TENABLE_CSV_FILE_PATH);
+			TenablePdfGenerator.run(tenableReports, k2Reports, OUTPUT_DIR);
+			TenableCSVGenerator.run(tenableReports, k2Reports, OUTPUT_DIR);
 		} else {
 			System.out.println("Only Tenable is supported now");
 		}

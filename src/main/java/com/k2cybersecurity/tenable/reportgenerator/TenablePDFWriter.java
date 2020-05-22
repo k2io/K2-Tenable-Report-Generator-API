@@ -78,7 +78,8 @@ public class TenablePDFWriter {
 							.setBackgroundColor(Color.LIGHT_GRAY).setPadding(5f));
 				} else {
 					String tenableReport = "";
-					tenableReport += "Finding ID: " + endReport.get(pair).getTenableReports().get(0).getPluginID();
+					tenableReport += "Name : " + endReport.get(pair).getTenableReports().get(0).getName();
+					tenableReport += "\nFinding ID : " + endReport.get(pair).getTenableReports().get(0).getPluginID();
 					tenableReport += "\nRisk : " + endReport.get(pair).getTenableReports().get(0).getRisk();
 
 					if (endReport.get(pair).getTenableReports().get(0).getTenablePluginOutput().getUrl() != null) {
@@ -131,7 +132,8 @@ public class TenablePDFWriter {
 					List<K2Report> list = endReport.get(pair).getK2Reports();
 
 					String k2Report = "";
-					k2Report += "Finding ID: " + list.get(0).getIncidentID();
+					k2Report += "Name : " + list.get(0).getAttackDescription();
+					k2Report += "\nFinding ID : " + list.get(0).getIncidentID();
 					k2Report += "\nRisk : High";
 					k2Report += "\nFile Name : " + list.get(0).getFileName();
 					k2Report += "\nMethod Name : " + list.get(0).getMethodName();
