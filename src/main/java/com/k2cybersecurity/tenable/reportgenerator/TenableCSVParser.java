@@ -140,6 +140,8 @@ public class TenableCSVParser {
 			if (tenableReport.getTenablePluginOutput().getUrl() != null) {
 				url = tenableReport.getTenablePluginOutput().getUrl();
 				uri = StringUtils.substring(url, StringUtils.ordinalIndexOf(url, "/", 3));
+			} else {
+				uri = "NA";
 			}
 			ImmutablePair<String, String> pair = new ImmutablePair<String, String>(uri, tenableReport.getName());
 
