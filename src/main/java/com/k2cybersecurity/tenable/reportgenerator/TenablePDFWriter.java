@@ -26,7 +26,7 @@ public class TenablePDFWriter {
 			Map<ImmutablePair<String, String>, CombinedMapValue> endReport, String OUTPUT_DIR) {
 
 		String filename = OUTPUT_DIR + "/K2-Tenable-Report.pdf";
-
+		System.out.println("Wrinting K2 & Tenable joint PDF report" + filename);
 		PdfWriter writer;
 		try {
 			writer = new PdfWriter(filename);

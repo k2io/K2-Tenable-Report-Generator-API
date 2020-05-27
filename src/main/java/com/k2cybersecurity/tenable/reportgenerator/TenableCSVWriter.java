@@ -17,7 +17,7 @@ public class TenableCSVWriter {
 		try {
 
 			String filename = OUTPUT_DIR + "/K2-Tenable-Report.csv";
-			System.out.println("In CSV Writer" + filename);
+			System.out.println("Wrinting K2 & Tenable joint CSV report" + filename);
 			FileWriter out = new FileWriter(new File(filename));
 			CSVPrinter printer = new CSVPrinter(out,
 					CSVFormat.DEFAULT.withHeader("Plugin ID", "CVE", "CVSS", "Risk", "Host", "Protocol", "Port", "Name",

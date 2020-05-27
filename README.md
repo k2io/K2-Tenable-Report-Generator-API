@@ -16,5 +16,5 @@ java -jar k2-report-generator.jar
 Use Case:
 
 ```
-java -jar k2-report-generator.jar tenable <path-to-k2-report-csv> <path-to-tenable-report-csv> <outpur-dir>
+java -jar k2-report-generator.jar tenable <tenable-scan-id> <outpur-dir>
 ```
