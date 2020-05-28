@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -76,6 +77,13 @@ public class GetScannedReports {
 			System.out.println("Tenable Report Export Response : " + json.toJSONString());
 			exportedFileName = (String) json.get("file");
 			System.out.println("File name : " + exportedFileName);
+//			System.out.println("Sleep 60 sec for extracting report");
+//			try {
+//				TimeUnit.SECONDS.sleep(60);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		} catch (IOException | ParseException e) {
 			e.printStackTrace();
 		}
@@ -206,8 +214,25 @@ public class GetScannedReports {
 	public static void run(String SCAN_ID, String OUTPUT_DIR) {
 		tenableScanInfo(SCAN_ID);
 		tenableExportReport(SCAN_ID);
-		if (StringUtils.isNotBlank(exportedFileName) && tenableExportStatus(SCAN_ID, exportedFileName)) {
-			tenableDownloadReport(SCAN_ID, OUTPUT_DIR, exportedFileName);
+		if (StringUtils.isNotBlank(exportedFileName)) {
+			int retry = 5;
+			while (retry-- > 0) {
+				if (tenableExportStatus(SCAN_ID, exportedFileName)) {
+					tenableDownloadReport(SCAN_ID, OUTPUT_DIR, exportedFileName);
+					break;
+				}
+				try {
+					System.out.println("Report not extracted yet, retrying...");
+					TimeUnit.SECONDS.sleep(60);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			if (retry == 0) {
+				System.out.println("Tenable Report not extracted properly");
+			}
+		} else {
+			System.out.println("Tenable report not extracted.");
 		}
 
 		k2Session();
