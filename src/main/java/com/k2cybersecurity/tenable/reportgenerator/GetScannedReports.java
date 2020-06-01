@@ -1,8 +1,12 @@
 package com.k2cybersecurity.tenable.reportgenerator;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -11,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -23,20 +28,23 @@ import org.json.simple.parser.ParseException;
 
 public class GetScannedReports {
 	private static String tenableUrl = "https://cloud.tenable.com";
-	private static String XApiKeys = "";
+	private static String XApiKeys = StringUtils.EMPTY;
 	private static String k2Url = "https://www.k2io.net/centralmanager";
-	private static String k2CustomerId = "";
-	private static String k2CustomerEmail = "";
-	private static String k2CustomerPassword = "";
+	private static String k2CustomerId = StringUtils.EMPTY;
+	private static String k2CustomerEmail = StringUtils.EMPTY;
+	private static String k2CustomerPassword = StringUtils.EMPTY;
 	private static Long startTime;
 	private static Long endTime;
 	private static String exportedFileName = StringUtils.EMPTY;
 	private static final String COOKIES_HEADER = "Set-Cookie";
 	private static java.net.CookieManager cookieManager = new java.net.CookieManager();
+	private static String K2_REPORT_NAME = "K2-Report.csv";
+	private static String TENABLE_REPORT_NAME = "Tenable-Report.csv";
 
 	private static void tenableScanInfo(String SCAN_ID) {
 		String url = tenableUrl + "/scans/" + SCAN_ID;
 		try {
+			System.out.println("url : -> " + url);
 			HttpURLConnection httpClient = (HttpURLConnection) new URL(url).openConnection();
 			httpClient.addRequestProperty("X-ApiKeys", XApiKeys);
 			httpClient.setRequestMethod("GET");
@@ -130,8 +138,8 @@ public class GetScannedReports {
 //			}
 //			System.out.println("Download Response : " + response.readLine());
 //			System.out.println("Download Response : " + response.readLine());
-			System.out.println("Saving Tenable Report in file : " + OUTPUT_DIR + "/Tenable-Report.csv");
-			IOUtils.copy(response, new FileOutputStream(new File(OUTPUT_DIR + "/Tenable-Report.csv")), "utf-8");
+			System.out.println("Saving Tenable Report in file : " + OUTPUT_DIR + "/" + TENABLE_REPORT_NAME);
+			IOUtils.copy(response, new FileOutputStream(new File(OUTPUT_DIR + "/" + TENABLE_REPORT_NAME)), "utf-8");
 			response.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,29 +197,66 @@ public class GetScannedReports {
 //				System.out.flush();
 //			}
 //			System.out.println("Response : " + response);
-			System.out.println("Saving K2 Report in file : " + OUTPUT_DIR + "/K2-Report.csv");
-			IOUtils.copy(response, new FileOutputStream(new File(OUTPUT_DIR + "/K2-Report.csv")), "utf-8");
+			System.out.println("Saving K2 Report in file : " + OUTPUT_DIR + "/" + K2_REPORT_NAME);
+			IOUtils.copy(response, new FileOutputStream(new File(OUTPUT_DIR + "/" + K2_REPORT_NAME)), "utf-8");
 			response.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-//	private static JSONObject getECSInfo() {
-//		try {
-//			String url = System.getenv("ECS_CONTAINER_METADATA_URI");
-//			HttpURLConnection httpClient = (HttpURLConnection) new URL(url).openConnection();
-//			String response = new String(
-//					IOUtils.readFully(httpClient.getInputStream(), httpClient.getInputStream().available()));
-//			JSONParser parser = new JSONParser();
-//			JSONObject json = (JSONObject) parser.parse(response);
-//			return json;
-//		} catch (IOException | org.json.simple.parser.ParseException e) {
-//			return null;
-//		}
-//	}
+	private static void k2FilterReport(String hostIp, String appName, String outputDir) {
+		System.out.println("Filtering K2 report for hostIp and appName");
+		try {
+			File inputFile = new File(outputDir + "/" + K2_REPORT_NAME);
+			File tempFile = new File("tempFile.csv");
 
-	public static void run(String SCAN_ID, String OUTPUT_DIR) {
+			BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+			String currentLine;
+			int skip = 0;
+			while ((currentLine = reader.readLine()) != null) {
+				if (skip == 0) {
+					writer.write(currentLine + System.getProperty("line.separator"));
+					skip++;
+					continue;
+				}
+				if (StringUtils.contains(currentLine, hostIp) && StringUtils.contains(currentLine, appName)) {
+					writer.write(currentLine + System.getProperty("line.separator"));
+				}
+			}
+			writer.close();
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void run(String dastProperties, String k2Properties, String SCAN_ID, String hostIp, String appName,
+			String OUTPUT_DIR) {
+		try {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream(new File(dastProperties)));
+			tenableUrl = properties.getProperty("tenableUrl");
+			XApiKeys = "accessKey=" + properties.getProperty("accessKey") + "; secretKey="
+					+ properties.getProperty("secretKey") + ";";
+
+		} catch (IOException e1) {
+			System.out.println("Properties files doesn't exist, please provide correct -dastProperties parameter");
+		}
+		try {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream(new File(k2Properties)));
+			k2Url = properties.getProperty("k2Url");
+			k2CustomerId = properties.getProperty("k2CustomerId");
+			k2CustomerEmail = properties.getProperty("k2CustomerEmail");
+			k2CustomerPassword = properties.getProperty("k2CustomerPassword");
+		} catch (IOException e1) {
+			System.out.println("Properties files doesn't exist, please provide correct -dastProperties parameter");
+		}
+
 		tenableScanInfo(SCAN_ID);
 		tenableExportReport(SCAN_ID);
 		if (StringUtils.isNotBlank(exportedFileName)) {
@@ -222,14 +267,15 @@ public class GetScannedReports {
 					break;
 				}
 				try {
-					System.out.println("Report not extracted yet, retrying...");
+					System.out.println("Report not extracted yet, Retrying...");
 					TimeUnit.SECONDS.sleep(60);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 			if (retry == 0) {
-				System.out.println("Tenable Report not extracted properly");
+				System.out.println("Tenable Report not extracted properly, Exiting");
+				System.exit(1);
 			}
 		} else {
 			System.out.println("Tenable report not extracted.");
@@ -237,6 +283,7 @@ public class GetScannedReports {
 
 		k2Session();
 		k2DownloadReport(OUTPUT_DIR);
+		k2FilterReport(hostIp, appName, OUTPUT_DIR);
 	}
 
 //	public static void main(String[] args) {
