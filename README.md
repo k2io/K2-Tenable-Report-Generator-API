@@ -22,12 +22,19 @@ java -jar k2-report-generator-api.jar -dast "<vendor-name>" -outputDir "<output-
 
 ### Parameter information
 -dast : vendor name (ex. tenable)
+
 -outputDir : Final reports will be created in this repository, repository will be created if not present
+
 -dastProperties : Update dast.properties file and provide full path of dast.properties file using this Parameter.
+
 -k2Properties : K2 properties file full path
+
 -scanId : Numerical scan id number of the scan for which reports has to be processed.
+
 -hostIp : Private IP of the machine on which scan has been run.
+
 -appName : Web application name on which scan has ran.
+
 
 ### How to get hostIp:
 Once the scan completes get the hostIp from any one of the incident for that scan from K2 Manager UI.
