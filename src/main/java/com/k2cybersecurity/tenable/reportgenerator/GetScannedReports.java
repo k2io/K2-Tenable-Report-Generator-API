@@ -59,7 +59,8 @@ public class GetScannedReports {
 			endTime = (Long) info.get("scan_end") * 1000;
 
 		} catch (IOException | ParseException e) {
-			e.printStackTrace();
+			System.out.println("Error in fetcing tenable scan info");
+			System.exit(1);
 		}
 	}
 
@@ -85,15 +86,9 @@ public class GetScannedReports {
 			System.out.println("Tenable Report Export Response : " + json.toJSONString());
 			exportedFileName = (String) json.get("file");
 			System.out.println("File name : " + exportedFileName);
-//			System.out.println("Sleep 60 sec for extracting report");
-//			try {
-//				TimeUnit.SECONDS.sleep(60);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		} catch (IOException | ParseException e) {
-			e.printStackTrace();
+			System.out.println("Error in exporting temable report");
+			System.exit(1);
 		}
 	}
 
@@ -131,18 +126,12 @@ public class GetScannedReports {
 			httpClient.setRequestMethod("GET");
 
 			BufferedReader response = new BufferedReader(new InputStreamReader(httpClient.getInputStream()));
-//			String line;
-//			while ((line = response.readLine()) != null) {
-//				System.out.println(line);
-//				System.out.flush();
-//			}
-//			System.out.println("Download Response : " + response.readLine());
-//			System.out.println("Download Response : " + response.readLine());
 			System.out.println("Saving Tenable Report in file : " + OUTPUT_DIR + "/" + TENABLE_REPORT_NAME);
 			IOUtils.copy(response, new FileOutputStream(new File(OUTPUT_DIR + "/" + TENABLE_REPORT_NAME)), "utf-8");
 			response.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error in downloading exported report");
+			System.exit(1);
 		}
 	}
 
@@ -176,6 +165,8 @@ public class GetScannedReports {
 			response.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("Error in session creation for downloading K2 report");
+			System.exit(1);
 		}
 	}
 
@@ -191,17 +182,13 @@ public class GetScannedReports {
 						StringUtils.join(cookieManager.getCookieStore().getCookies(), ';'));
 			}
 			BufferedReader response = new BufferedReader(new InputStreamReader(httpClient.getInputStream()));
-//			String line;
-//			while ((line = response.readLine()) != null) {
-//				System.out.println(line);
-//				System.out.flush();
-//			}
-//			System.out.println("Response : " + response);
 			System.out.println("Saving K2 Report in file : " + OUTPUT_DIR + "/" + K2_REPORT_NAME);
 			IOUtils.copy(response, new FileOutputStream(new File(OUTPUT_DIR + "/" + K2_REPORT_NAME)), "utf-8");
 			response.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("Error in downloading K2 report");
+			System.exit(1);
 		}
 	}
 
@@ -230,6 +217,8 @@ public class GetScannedReports {
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("Error in filtering K2 report");
+			System.exit(1);
 		}
 
 	}
@@ -244,7 +233,8 @@ public class GetScannedReports {
 					+ properties.getProperty("secretKey") + ";";
 
 		} catch (IOException e1) {
-			System.out.println("Properties files doesn't exist, please provide correct -dastProperties parameter");
+			System.out.println("DAST Properties files doesn't exist, please provide correct -dastProperties parameter");
+			System.exit(1);
 		}
 		try {
 			Properties properties = new Properties();
@@ -254,7 +244,8 @@ public class GetScannedReports {
 			k2CustomerEmail = properties.getProperty("k2CustomerEmail");
 			k2CustomerPassword = properties.getProperty("k2CustomerPassword");
 		} catch (IOException e1) {
-			System.out.println("Properties files doesn't exist, please provide correct -dastProperties parameter");
+			System.out.println("K2 Properties files doesn't exist, please provide correct -dastProperties parameter");
+			System.exit(1);
 		}
 
 		tenableScanInfo(SCAN_ID);
