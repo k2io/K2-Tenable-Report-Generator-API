@@ -25,9 +25,9 @@ java -jar k2-report-generator-api.jar -dast "<vendor-name>" -outputDir "<output-
 
 -outputDir : Final reports will be created in this repository, repository will be created if not present
 
--dastProperties : Update dast.properties file and provide full path of dast.properties file using this Parameter.
+-dastProperties : Update [dast.properties](dast.properties) file and provide full path of dast.properties file using this Parameter.
 
--k2Properties : K2 properties file full path
+-k2Properties : Update [k2.properties](k2.properties) file and provide full path of k2.properties file using this Parameter.
 
 -scanId : Numerical scan id number of the scan for which reports has to be processed.
 
