@@ -41,3 +41,22 @@ Once the scan completes get the hostIp from any one of the incident for that sca
 
 ### How to get appName:
 Once the scan completes get the appName from any one of the incident for that scan from K2 Manager UI.
+
+### Sample dast.properties
+```
+tenableUrl=https://cloud.tenable.com
+accessKey=
+secretKey=
+```
+### How to get the DAST propperties for Tenable?
+Login to tenable.io, Go to My Account -> API Keys and generate API keys.
+
+### Sample k2.preoperties
+```
+k2Url=https://www.k2io.net/centralmanager
+k2CustomerId=
+k2CustomerEmail=
+k2CustomerPassword=
+```
+### How to get the K2 properties?
+Use k2io.com account, customerId and credentials in k2.properties.
