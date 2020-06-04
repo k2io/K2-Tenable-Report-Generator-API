@@ -37,10 +37,12 @@ java -jar k2-report-generator-api.jar -dast "<vendor-name>" -outputDir "<output-
 
 
 ### How to get ip?
-Once the scan completes get the hostIp from any one of the incident for that scan from K2 Manager UI.
+Once the scan completes get the hostIp from any one of the incident for that scan from K2 Manager UI.(See screenshot)
 
 ### How to get appName?
-Once the scan completes get the appName from any one of the incident for that scan from K2 Manager UI.
+Once the scan completes get the appName from any one of the incident for that scan from K2 Manager UI.(See screenshot)
+
+![how-to-get-ip-appname](how-to-get-ip-appname.png)
 
 ### Sample dast.properties
 ```

@@ -217,6 +217,7 @@ public class GetScannedReports {
 			}
 			writer.close();
 			reader.close();
+			tempFile.delete();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Error in filtering K2 report");
