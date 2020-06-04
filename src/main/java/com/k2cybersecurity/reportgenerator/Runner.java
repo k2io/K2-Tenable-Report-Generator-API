@@ -23,14 +23,18 @@ public class Runner {
 	private static String outputDir = StringUtils.EMPTY;
 	private static String scanId = StringUtils.EMPTY;
 	private static String appName = StringUtils.EMPTY;
-	private static String hostIp = StringUtils.EMPTY;
+	private static String ip = StringUtils.EMPTY;
 	private static String k2ReportName = StringUtils.EMPTY;
 	private static String tenableReportName = StringUtils.EMPTY;
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_RESET = "\u001B[0m";
 
 	public static void main(String[] args) {
+		System.out.println(ANSI_GREEN + "Initialization" + ANSI_RESET);
 		extractParams(args);
 		withApi(args);
 //		withoutApi(args);
+		System.out.println(ANSI_GREEN + "Report generation completed" + ANSI_RESET);
 	}
 
 	private static void extractParams(String[] args) {
@@ -48,8 +52,8 @@ public class Runner {
 					scanId = args[++i];
 				} else if (StringUtils.equals(args[i], "-appName")) {
 					appName = args[++i];
-				} else if (StringUtils.equals(args[i], "-hostIp")) {
-					hostIp = args[++i];
+				} else if (StringUtils.equals(args[i], "-ip")) {
+					ip = args[++i];
 				} else if (StringUtils.equals(args[i], "-k2ReportName")) {
 					k2ReportName = args[++i];
 				} else if (StringUtils.equals(args[i], "-tenableReportName")) {
@@ -93,11 +97,14 @@ public class Runner {
 		String OUTPUT_DIR = outputDir;
 
 		List<K2Report> k2Reports = new ArrayList<K2Report>();
+		System.out.println(ANSI_GREEN + "STEP 1: Parsing K2 report" + ANSI_RESET);
 		K2CSVParser.run(K2_CSV_FILE_PATH, k2Reports);
 
 		if (StringUtils.equalsIgnoreCase(REPORT_NAME, "tenable")) {
 			List<TenableReport> tenableReports = new ArrayList<TenableReport>();
+			System.out.println(ANSI_GREEN + "STEP 2: Parsing Tenable report" + ANSI_RESET);
 			TenableCSVParser.run(tenableReports, TENABLE_CSV_FILE_PATH);
+			System.out.println(ANSI_GREEN + "STEP 3: Merging the reports" + ANSI_RESET);
 			TenablePdfGenerator.run(tenableReports, k2Reports, OUTPUT_DIR);
 			TenableCSVGenerator.run(tenableReports, k2Reports, OUTPUT_DIR);
 		} else {
@@ -122,8 +129,8 @@ public class Runner {
 			System.out.println("Please provide -scanid parameter");
 			System.exit(1);
 		}
-		if (StringUtils.isBlank(hostIp)) {
-			System.out.println("Please provide -hostIp parameter");
+		if (StringUtils.isBlank(ip)) {
+			System.out.println("Please provide -ip parameter");
 			System.exit(1);
 		}
 		if (StringUtils.isBlank(appName)) {
@@ -139,7 +146,7 @@ public class Runner {
 		System.out.println("dastProperties : " + dastProperties);
 		System.out.println("k2Properties : " + k2Properties);
 		System.out.println("scanId : " + scanId);
-		System.out.println("hostIp : " + hostIp);
+		System.out.println("ip : " + ip);
 		System.out.println("appName : " + appName);
 		System.out.println("outputDir : " + outputDir);
 		try {
@@ -156,18 +163,21 @@ public class Runner {
 //		String TENABLE_CSV_FILE_PATH = "/Users/prateek/Downloads/prateek_dvja-5.csv";
 
 		if (StringUtils.equalsIgnoreCase(dast, "tenable")) {
-			GetScannedReports.run(dastProperties, k2Properties, scanId, hostIp, appName, outputDir);
+			GetScannedReports.run(dastProperties, k2Properties, scanId, ip, appName, outputDir);
 		} else {
 			System.out.println("Only Tenable is supported now.");
 			System.exit(1);
 		}
 
 		List<K2Report> k2Reports = new ArrayList<K2Report>();
+		System.out.println(ANSI_GREEN + "STEP 3: Parsing K2 report" + ANSI_RESET);
 		K2CSVParser.run(outputDir + "/K2-Report.csv", k2Reports);
 
 		if (StringUtils.equalsIgnoreCase(dast, "tenable")) {
 			List<TenableReport> tenableReports = new ArrayList<TenableReport>();
+			System.out.println(ANSI_GREEN + "STEP 4: Parsing Tenable report" + ANSI_RESET);
 			TenableCSVParser.run(tenableReports, outputDir + "/Tenable-Report.csv");
+			System.out.println(ANSI_GREEN + "STEP 5: Merging the reports" + ANSI_RESET);
 			TenablePdfGenerator.run(tenableReports, k2Reports, outputDir);
 			TenableCSVGenerator.run(tenableReports, k2Reports, outputDir);
 		} else {

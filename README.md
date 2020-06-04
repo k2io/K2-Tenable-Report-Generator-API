@@ -15,7 +15,7 @@ mvn clean package
 Use Case:
 
 ```
-java -jar k2-report-generator-api.jar -dast "<vendor-name>" -outputDir "<output-dir-path-where-reports-will-extract>" -dastProperties "<path-to-dast-properties-file>" -k2Properties "<path-to-k2-properties-file>" -scanId "<scan-id>" -hostIp "<hostip>" -appName "<web-application-name>"
+java -jar k2-report-generator-api.jar -dast "<vendor-name>" -outputDir "<output-dir-path-where-reports-will-extract>" -dastProperties "<path-to-dast-properties-file>" -k2Properties "<path-to-k2-properties-file>" -scanId "<scan-id>" -ip "<ip>" -appName "<web-application-name>"
 ```
 
 **Note** : All parameters are mandatory
@@ -31,15 +31,15 @@ java -jar k2-report-generator-api.jar -dast "<vendor-name>" -outputDir "<output-
 
 -scanId : Numerical scan id number of the scan for which reports has to be processed.
 
--hostIp : Private IP of the machine on which scan has been run.
+-ip : Private IP of the machine on which scan has been run.
 
 -appName : Web application name on which scan has ran.
 
 
-### How to get hostIp:
+### How to get ip?
 Once the scan completes get the hostIp from any one of the incident for that scan from K2 Manager UI.
 
-### How to get appName:
+### How to get appName?
 Once the scan completes get the appName from any one of the incident for that scan from K2 Manager UI.
 
 ### Sample dast.properties

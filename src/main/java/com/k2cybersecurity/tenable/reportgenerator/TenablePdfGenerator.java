@@ -157,7 +157,6 @@ public class TenablePdfGenerator {
 		for (ImmutablePair<String, String> pair : endReport.keySet()) {
 			System.out.println(pair.getLeft() + " : " + pair.getRight());
 		}
-		System.out.println("======\n");
 	}
 
 	public static void run(List<TenableReport> tenableReports, List<K2Report> k2Reports, String OUTPUT_DIR) {

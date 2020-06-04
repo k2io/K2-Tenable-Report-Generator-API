@@ -40,6 +40,8 @@ public class GetScannedReports {
 	private static java.net.CookieManager cookieManager = new java.net.CookieManager();
 	private static String K2_REPORT_NAME = "K2-Report.csv";
 	private static String TENABLE_REPORT_NAME = "Tenable-Report.csv";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_RESET = "\u001B[0m";
 
 	private static void tenableScanInfo(String SCAN_ID) {
 		String url = tenableUrl + "/scans/" + SCAN_ID;
@@ -248,6 +250,7 @@ public class GetScannedReports {
 			System.exit(1);
 		}
 
+		System.out.println(ANSI_GREEN + "STEP 1: Connecting to Tenable" + ANSI_RESET);
 		tenableScanInfo(SCAN_ID);
 		tenableExportReport(SCAN_ID);
 		if (StringUtils.isNotBlank(exportedFileName)) {
@@ -271,7 +274,7 @@ public class GetScannedReports {
 		} else {
 			System.out.println("Tenable report not extracted.");
 		}
-
+		System.out.println(ANSI_GREEN + "STEP 2: Connecting to K2" + ANSI_RESET);
 		k2Session();
 		k2DownloadReport(OUTPUT_DIR);
 		k2FilterReport(hostIp, appName, OUTPUT_DIR);
