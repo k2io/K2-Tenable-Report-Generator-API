@@ -30,11 +30,11 @@ public class Runner {
 	public static final String ANSI_RESET = "\u001B[0m";
 
 	public static void main(String[] args) {
-		System.out.println(ANSI_GREEN + "Initialization" + ANSI_RESET);
+		System.out.println(ANSI_GREEN + "STEP 1: " + ANSI_RESET + "Initialization");
+		System.out.println();
 		extractParams(args);
 		withApi(args);
 //		withoutApi(args);
-		System.out.println(ANSI_GREEN + "Report generation completed" + ANSI_RESET);
 	}
 
 	private static void extractParams(String[] args) {
@@ -97,14 +97,20 @@ public class Runner {
 		String OUTPUT_DIR = outputDir;
 
 		List<K2Report> k2Reports = new ArrayList<K2Report>();
-		System.out.println(ANSI_GREEN + "STEP 1: Parsing K2 report" + ANSI_RESET);
+		System.out.println("==========================");
+		System.out.println(ANSI_GREEN + "STEP 2: " + ANSI_RESET + "Parsing K2 report");
+		System.out.println();
 		K2CSVParser.run(K2_CSV_FILE_PATH, k2Reports);
 
 		if (StringUtils.equalsIgnoreCase(REPORT_NAME, "tenable")) {
 			List<TenableReport> tenableReports = new ArrayList<TenableReport>();
-			System.out.println(ANSI_GREEN + "STEP 2: Parsing Tenable report" + ANSI_RESET);
+			System.out.println("==========================");
+			System.out.println(ANSI_GREEN + "STEP 3: " + ANSI_RESET + "Parsing Tenable report");
+			System.out.println();
 			TenableCSVParser.run(tenableReports, TENABLE_CSV_FILE_PATH);
-			System.out.println(ANSI_GREEN + "STEP 3: Merging the reports" + ANSI_RESET);
+			System.out.println("==========================");
+			System.out.println(ANSI_GREEN + "STEP 4: " + ANSI_RESET + "Merging the reports");
+			System.out.println();
 			TenablePdfGenerator.run(tenableReports, k2Reports, OUTPUT_DIR);
 			TenableCSVGenerator.run(tenableReports, k2Reports, OUTPUT_DIR);
 		} else {
@@ -170,14 +176,20 @@ public class Runner {
 		}
 
 		List<K2Report> k2Reports = new ArrayList<K2Report>();
-		System.out.println(ANSI_GREEN + "STEP 3: Parsing K2 report" + ANSI_RESET);
+		System.out.println("==========================");
+		System.out.println(ANSI_GREEN + "STEP 4: " + ANSI_RESET + "Parsing K2 report");
+		System.out.println();
 		K2CSVParser.run(outputDir + "/K2-Report.csv", k2Reports);
 
 		if (StringUtils.equalsIgnoreCase(dast, "tenable")) {
 			List<TenableReport> tenableReports = new ArrayList<TenableReport>();
-			System.out.println(ANSI_GREEN + "STEP 4: Parsing Tenable report" + ANSI_RESET);
+			System.out.println("==========================");
+			System.out.println(ANSI_GREEN + "STEP 5: " + ANSI_RESET + "Parsing Tenable report");
+			System.out.println();
 			TenableCSVParser.run(tenableReports, outputDir + "/Tenable-Report.csv");
-			System.out.println(ANSI_GREEN + "STEP 5: Merging the reports" + ANSI_RESET);
+			System.out.println("==========================");
+			System.out.println(ANSI_GREEN + "STEP 6: " + ANSI_RESET + "Merging the reports");
+			System.out.println();
 			TenablePdfGenerator.run(tenableReports, k2Reports, outputDir);
 			TenableCSVGenerator.run(tenableReports, k2Reports, outputDir);
 		} else {

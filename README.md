@@ -65,7 +65,8 @@ Use k2io.com account, customerId and credentials in k2.properties.
 
 ### Sample output
 ```
-Initialization
+STEP 1: Initialization
+
 Printing user parameters:
 dast : tenable
 dastProperties : /Users/prateek/Downloads/RGA/dast.properties
@@ -75,29 +76,38 @@ ip : 172.16.1.161
 appName : Damn Vulnerable Java Application
 outputDir : /Users/prateek/Downloads/RGA
 Creating directory /Users/prateek/Downloads/RGA
-STEP 1: Connecting to Tenable
+==========================
+STEP 2: Connecting to Tenable
+
 url : -> https://cloud.tenable.com/scans/22
 Tenable Scan info for ID: 22
 {"alt_targets_used":false,"shared":null,"tag_targets":null,"user_permissions":128,"acls":[{"owner":null,"permissions":0,"name":null,"id":null,"display_name":null,"type":"default","uuid":null},{"owner":1,"permissions":128,"name":"kiran@k2io.com","id":2,"display_name":"kiran@k2io.com","type":"user","uuid":"b7e7ebf1-adc6-4b49-a84d-4a6c24b11480"}],"scan_type":"webapp","uuid":"eb437554-4139-430c-b11e-a8aa150d2104","targets":"http:\/\/52.55.46.1:8080\/","scanner_start":null,"hostcount":0,"haskb":false,"scanner_end":null,"policy":"Web App Scan","timestamp":1589923748,"owner":"kiran@k2io.com","schedule_uuid":"45154b97-9ff8-6f14-3615-1beadd6d4be355e3c841265ba998","pci-can-upload":false,"scan_end":1589923748,"control":true,"hasaudittrail":true,"scanner_name":"US Cloud Scanner","object_id":22,"is_archived":false,"no_target":false,"name":"prateek-dvja","edit_allowed":false,"scan_start":1589894720,"folder_id":3,"status":"completed"}
 Tenable Scan Start Timestamp : 1589894720
 Tenable Scan End Timestamp : 1589923748
-Tenable Report Export Response : {"file":"639034ec-1526-41ba-840e-337d1b627839"}
-File name : 639034ec-1526-41ba-840e-337d1b627839
+Tenable Report Export Response : {"file":"c52d4a02-3a6f-4521-ae3a-4b4217276360"}
+File name : c52d4a02-3a6f-4521-ae3a-4b4217276360
 Tenable Export Status Response : {"status":"ready"}
 Status : ready
 Saving Tenable Report in file : /Users/prateek/Downloads/RGA/Tenable-Report.csv
-STEP 2: Connecting to K2
+==========================
+STEP 3: Connecting to K2
+
 K2 Login Response : ok
 Logged in successfully, Session created.
 Saving K2 Report in file : /Users/prateek/Downloads/RGA/K2-Report.csv
 Filtering K2 report for hostIp and appName
-STEP 3: Parsing K2 report
+==========================
+STEP 4: Parsing K2 report
+
 Parsing K2 csv report
 K2 CSV parsing completed
-STEP 4: Parsing Tenable report
+==========================
+STEP 5: Parsing Tenable report
+
 Parsing Tenable csv report
 Tenable csv parsing completed
-STEP 5: Merging the reports
+==========================
+STEP 6: Merging the reports
 
 PRINTING VULNERABILITIES
 /listProduct.action : Reflected XSS Attack
@@ -106,5 +116,4 @@ PRINTING VULNERABILITIES
 /ping.action : Remote Code Execution
 Writing K2 & Tenable joint PDF report/Users/prateek/Downloads/RGA/K2-Tenable-Report.pdf
 Writing K2 & Tenable joint CSV report/Users/prateek/Downloads/RGA/K2-Tenable-Report.csv
-Report generation completed
 ```

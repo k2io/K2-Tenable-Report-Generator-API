@@ -250,8 +250,9 @@ public class GetScannedReports {
 			System.out.println("K2 Properties files doesn't exist, please provide correct -dastProperties parameter");
 			System.exit(1);
 		}
-
-		System.out.println(ANSI_GREEN + "STEP 1: Connecting to Tenable" + ANSI_RESET);
+		System.out.println("==========================");
+		System.out.println(ANSI_GREEN + "STEP 2: " + ANSI_RESET + "Connecting to Tenable");
+		System.out.println();
 		tenableScanInfo(SCAN_ID);
 		tenableExportReport(SCAN_ID);
 		if (StringUtils.isNotBlank(exportedFileName)) {
@@ -275,7 +276,9 @@ public class GetScannedReports {
 		} else {
 			System.out.println("Tenable report not extracted.");
 		}
-		System.out.println(ANSI_GREEN + "STEP 2: Connecting to K2" + ANSI_RESET);
+		System.out.println("==========================");
+		System.out.println(ANSI_GREEN + "STEP 3: " + ANSI_RESET + "Connecting to K2");
+		System.out.println();
 		k2Session();
 		k2DownloadReport(OUTPUT_DIR);
 		k2FilterReport(hostIp, appName, OUTPUT_DIR);

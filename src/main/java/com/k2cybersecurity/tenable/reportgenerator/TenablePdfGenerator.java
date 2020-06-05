@@ -153,7 +153,7 @@ public class TenablePdfGenerator {
 	}
 
 	private static void printEndReport(Map<ImmutablePair<String, String>, CombinedMapValue> endReport) {
-		System.out.println("\nPRINTING VULNERABILITIES");
+		System.out.println("PRINTING VULNERABILITIES");
 		for (ImmutablePair<String, String> pair : endReport.keySet()) {
 			System.out.println(pair.getLeft() + " : " + pair.getRight());
 		}
