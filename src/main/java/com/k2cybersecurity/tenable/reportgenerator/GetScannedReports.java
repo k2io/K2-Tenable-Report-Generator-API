@@ -49,6 +49,7 @@ public class GetScannedReports {
 			System.out.println("url : -> " + url);
 			HttpURLConnection httpClient = (HttpURLConnection) new URL(url).openConnection();
 			httpClient.addRequestProperty("X-ApiKeys", XApiKeys);
+			httpClient.addRequestProperty("User-Agent", "Integration/1.0 (K2 Cyber Security; K2-Tenable; 1.0)");
 			httpClient.setRequestMethod("GET");
 			BufferedReader response = new BufferedReader(new InputStreamReader(httpClient.getInputStream()));
 			JSONParser parser = new JSONParser();
@@ -73,6 +74,7 @@ public class GetScannedReports {
 			httpClient.setRequestProperty("Accept", "application/json");
 			httpClient.setRequestProperty("content-type", "application/json");
 			httpClient.addRequestProperty("X-ApiKeys", XApiKeys);
+			httpClient.addRequestProperty("User-Agent", "Integration/1.0 (K2 Cyber Security; K2-Tenable; 1.0)");
 			httpClient.setDoOutput(true);
 			httpClient.setRequestMethod("POST");
 
@@ -100,6 +102,7 @@ public class GetScannedReports {
 			HttpURLConnection httpClient = (HttpURLConnection) new URL(url).openConnection();
 			httpClient.setRequestProperty("Accept", "application/json");
 			httpClient.addRequestProperty("X-ApiKeys", XApiKeys);
+			httpClient.addRequestProperty("User-Agent", "Integration/1.0 (K2 Cyber Security; K2-Tenable; 1.0)");
 			httpClient.setRequestMethod("GET");
 
 			BufferedReader response = new BufferedReader(new InputStreamReader(httpClient.getInputStream()));
@@ -125,6 +128,7 @@ public class GetScannedReports {
 			HttpURLConnection httpClient = (HttpURLConnection) new URL(url).openConnection();
 			httpClient.setRequestProperty("Accept", "application/json");
 			httpClient.addRequestProperty("X-ApiKeys", XApiKeys);
+			httpClient.addRequestProperty("User-Agent", "Integration/1.0 (K2 Cyber Security; K2-Tenable; 1.0)");
 			httpClient.setRequestMethod("GET");
 
 			BufferedReader response = new BufferedReader(new InputStreamReader(httpClient.getInputStream()));

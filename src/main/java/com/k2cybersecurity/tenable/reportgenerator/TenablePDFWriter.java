@@ -1,20 +1,28 @@
 package com.k2cybersecurity.tenable.reportgenerator;
 
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.border.Border;
 import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.property.HorizontalAlignment;
+import com.itextpdf.layout.property.Property;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 import com.k2cybersecurity.k2.models.K2Report;
@@ -36,6 +44,34 @@ public class TenablePDFWriter {
 					.setBackgroundColor(Color.DARK_GRAY).setFontColor(Color.WHITE).setBold()
 					.setTextAlignment(TextAlignment.CENTER).setFontSize(20f));
 
+			try {
+
+				ImageData imageData = ImageDataFactory.create("src/main/resources/k2io-logo.png");
+				Image pdfImg = new Image(imageData).setHorizontalAlignment(HorizontalAlignment.CENTER).setWidth(75f)
+						.setHeight(75);
+				Cell cell = new Cell();
+				cell.add(pdfImg);
+				cell.setBorder(Border.NO_BORDER);
+
+				ImageData imageData1 = ImageDataFactory.create("src/main/resources/tenable-logo.jpg");
+				Image pdfImg1 = new Image(imageData1).setHorizontalAlignment(HorizontalAlignment.CENTER).setWidth(165f)
+						.setHeight(75f);
+				Cell cell1 = new Cell();
+				cell1.add(pdfImg1);
+				cell1.setBorder(Border.NO_BORDER);
+
+				Table imgTable = new Table(new float[] { 1, 2 });
+				imgTable.setBorder(Border.NO_BORDER);
+				imgTable.setWidth(UnitValue.createPercentValue(100f));
+
+				imgTable.addCell(cell);
+				imgTable.addCell(cell1);
+
+				document.add(imgTable);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+
 			document.add(new Paragraph("Summary").setBackgroundColor(Color.ORANGE).setFontColor(Color.BLACK).setBold()
 					.setPadding(3f));
 
@@ -53,13 +89,17 @@ public class TenablePDFWriter {
 
 			Table table = new Table(new float[] { 1, 1 });
 			table.setWidth(UnitValue.createPercentValue(100f));
-
 			table.addHeaderCell(new Paragraph("URI").setBold().setFontColor(Color.BLUE));
 			table.addHeaderCell(new Paragraph("Vulnerabilities").setBold().setFontColor(Color.BLUE));
 
 			for (String str : vulApis.keySet()) {
+				Cell cell = new Cell();
+				Paragraph p = new Paragraph(str);
+				p.setProperty(Property.SPLIT_CHARACTERS, new CustomSplitCharacters());
+				cell.add(p);
+				table.addCell(cell);
+
 				String api = "";
-				table.addCell(str);
 				for (String s : vulApis.get(str)) {
 					api += s + "\n";
 				}
