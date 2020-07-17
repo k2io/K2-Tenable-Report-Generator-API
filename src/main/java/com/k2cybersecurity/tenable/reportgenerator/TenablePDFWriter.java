@@ -89,6 +89,7 @@ public class TenablePDFWriter {
 
 			Table table = new Table(new float[] { 1, 1 });
 			table.setWidth(UnitValue.createPercentValue(100f));
+			table.setFixedLayout();
 			table.addHeaderCell(new Paragraph("URI").setBold().setFontColor(Color.BLUE));
 			table.addHeaderCell(new Paragraph("Vulnerabilities").setBold().setFontColor(Color.BLUE));
 
