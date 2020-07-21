@@ -54,7 +54,7 @@ public class TenablePDFWriter {
 				cell.setBorder(Border.NO_BORDER);
 
 				ImageData imageData1 = ImageDataFactory.create("src/main/resources/tenable-logo.jpg");
-				Image pdfImg1 = new Image(imageData1).setHorizontalAlignment(HorizontalAlignment.CENTER).setWidth(165f)
+				Image pdfImg1 = new Image(imageData1).setHorizontalAlignment(HorizontalAlignment.CENTER).setWidth(320f)
 						.setHeight(75f);
 				Cell cell1 = new Cell();
 				cell1.add(pdfImg1);
