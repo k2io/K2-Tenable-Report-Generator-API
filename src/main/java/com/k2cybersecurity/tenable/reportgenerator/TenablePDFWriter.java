@@ -1,10 +1,13 @@
 package com.k2cybersecurity.tenable.reportgenerator;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -45,15 +48,15 @@ public class TenablePDFWriter {
 					.setTextAlignment(TextAlignment.CENTER).setFontSize(20f));
 
 			try {
-
-				ImageData imageData = ImageDataFactory.create("src/main/resources/k2io-logo.png");
+				ImageData imageData = ImageDataFactory.create(IOUtils.toByteArray(TenablePDFWriter.class.getClassLoader().getResourceAsStream("k2io-logo.png")));
 				Image pdfImg = new Image(imageData).setHorizontalAlignment(HorizontalAlignment.CENTER).setWidth(75f)
 						.setHeight(75);
 				Cell cell = new Cell();
 				cell.add(pdfImg);
 				cell.setBorder(Border.NO_BORDER);
 
-				ImageData imageData1 = ImageDataFactory.create("src/main/resources/tenable-logo.jpg");
+				ImageData imageData1 = ImageDataFactory.create(IOUtils.toByteArray(TenablePDFWriter.class.getClassLoader().getResourceAsStream("tenable-logo.jpg")));
+
 				Image pdfImg1 = new Image(imageData1).setHorizontalAlignment(HorizontalAlignment.CENTER).setWidth(320f)
 						.setHeight(75f);
 				Cell cell1 = new Cell();
@@ -69,6 +72,8 @@ public class TenablePDFWriter {
 
 				document.add(imgTable);
 			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
